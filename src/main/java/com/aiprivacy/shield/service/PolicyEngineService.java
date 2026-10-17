@@ -13,6 +13,7 @@ public class PolicyEngineService {
     private final SanitizerService sanitizer;
 
     private final Map<String, PrivacyPolicy> policies = new HashMap<>();
+    private volatile String activePolicyName = "DEFAULT";
 
     public PolicyEngineService(PiiDetectorService piiDetector,
                                PromptInjectionDetectorService injectionDetector,
@@ -34,8 +35,31 @@ public class PolicyEngineService {
     }
 
     public PrivacyPolicy getPolicy(String policyName) {
-        if (policyName == null) return policies.get("DEFAULT");
-        return policies.getOrDefault(policyName.toUpperCase(), policies.get("DEFAULT"));
+        if (policyName == null || policyName.isBlank()) return policies.getOrDefault(activePolicyName, policies.get("DEFAULT"));
+        return policies.getOrDefault(policyName.toUpperCase(), policies.getOrDefault(activePolicyName, policies.get("DEFAULT")));
+    }
+
+    public String getActivePolicyName() {
+        return activePolicyName;
+    }
+
+    public void setActivePolicyName(String policyName) {
+        if (policyName != null && policies.containsKey(policyName.toUpperCase())) {
+            this.activePolicyName = policyName.toUpperCase();
+        }
+    }
+
+    public PrivacyPolicy updatePolicy(String name, PrivacyPolicy updated) {
+        if (name == null || !policies.containsKey(name.toUpperCase())) {
+            return null;
+        }
+        PrivacyPolicy existing = policies.get(name.toUpperCase());
+        if (updated.getStrategy() != null) existing.setStrategy(updated.getStrategy());
+        if (updated.getEnabledCategories() != null) existing.setEnabledCategories(updated.getEnabledCategories());
+        existing.setBlockOnCredentials(updated.isBlockOnCredentials());
+        existing.setBlockOnInjection(updated.isBlockOnInjection());
+        existing.setStrictMode(updated.isStrictMode());
+        return existing;
     }
 
     public Map<String, PrivacyPolicy> getAllPolicies() {

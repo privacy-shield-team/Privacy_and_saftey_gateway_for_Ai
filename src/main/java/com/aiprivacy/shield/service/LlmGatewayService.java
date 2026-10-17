@@ -1,7 +1,10 @@
 package com.aiprivacy.shield.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,6 +12,8 @@ import java.util.*;
 
 @Service
 public class LlmGatewayService {
+
+    private static final Logger log = LoggerFactory.getLogger(LlmGatewayService.class);
 
     @Value("${ai.gateway.provider:mock}")
     private String configuredProvider;
@@ -25,10 +30,21 @@ public class LlmGatewayService {
     @Value("${ai.gateway.gemini.model:gemini-1.5-flash}")
     private String geminiModel;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public LlmGatewayService() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(8000);
+        factory.setReadTimeout(12000);
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     public String callModel(String protectedPrompt) {
-        String provider = resolveProvider();
+        return callModel(protectedPrompt, null);
+    }
+
+    public String callModel(String protectedPrompt, String requestedProvider) {
+        String provider = resolveProvider(requestedProvider);
 
         if ("openai".equalsIgnoreCase(provider)) {
             return callOpenAi(protectedPrompt);
@@ -40,20 +56,67 @@ public class LlmGatewayService {
     }
 
     public String getActiveModelName() {
-        String provider = resolveProvider();
+        return getActiveModelName(null);
+    }
+
+    public String getActiveModelName(String requestedProvider) {
+        String provider = resolveProvider(requestedProvider);
         if ("openai".equalsIgnoreCase(provider)) return "OpenAI (" + openAiModel + ")";
         if ("gemini".equalsIgnoreCase(provider)) return "Google Gemini (" + geminiModel + ")";
         return "Simulated AI Engine (Mock Mode)";
     }
 
-    private String resolveProvider() {
-        if ("openai".equalsIgnoreCase(configuredProvider) && !openAiApiKey.isBlank()) {
+    public boolean isOpenAiConfigured() {
+        return openAiApiKey != null && !openAiApiKey.isBlank() && !openAiApiKey.startsWith("${");
+    }
+
+    public boolean isGeminiConfigured() {
+        return geminiApiKey != null && !geminiApiKey.isBlank() && !geminiApiKey.startsWith("${");
+    }
+
+    public String resolveProvider(String requestedProvider) {
+        if (requestedProvider != null && !requestedProvider.isBlank() && !"auto".equalsIgnoreCase(requestedProvider)) {
+            String req = requestedProvider.toLowerCase().trim();
+            if ("openai".equals(req) && isOpenAiConfigured()) {
+                return "openai";
+            }
+            if ("gemini".equals(req) && isGeminiConfigured()) {
+                return "gemini";
+            }
+            if ("mock".equals(req)) {
+                return "mock";
+            }
+            log.info("Requested provider '{}' is not fully configured. Falling back to default/mock.", requestedProvider);
+            return "mock";
+        }
+
+        // Automatic resolution based on configuration and available API keys:
+        if ("openai".equalsIgnoreCase(configuredProvider) && isOpenAiConfigured()) {
             return "openai";
         }
-        if ("gemini".equalsIgnoreCase(configuredProvider) && !geminiApiKey.isBlank()) {
+        if ("gemini".equalsIgnoreCase(configuredProvider) && isGeminiConfigured()) {
+            return "gemini";
+        }
+        if (isOpenAiConfigured()) {
+            return "openai";
+        }
+        if (isGeminiConfigured()) {
             return "gemini";
         }
         return "mock";
+    }
+
+    public Map<String, Object> getProviderStatus() {
+        String active = resolveProvider(null);
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("activeProvider", active);
+        status.put("activeModelName", getActiveModelName());
+        status.put("openaiConfigured", isOpenAiConfigured());
+        status.put("openaiModel", openAiModel);
+        status.put("geminiConfigured", isGeminiConfigured());
+        status.put("geminiModel", geminiModel);
+        status.put("mockFallbackActive", true);
+        return status;
     }
 
     private String callOpenAi(String prompt) {
@@ -82,9 +145,11 @@ public class LlmGatewayService {
                     return (String) message.get("content");
                 }
             }
-            return "[Error]: Empty response from OpenAI.";
+            log.warn("OpenAI API returned empty choices. Falling back to Mock Mode.");
+            return callMockProvider(prompt) + "\n\n[Gateway Notice]: OpenAI returned empty choices. Seamlessly routed via fallback mock engine.";
         } catch (Exception e) {
-            return "[AI Provider Error]: Failed calling OpenAI API: " + e.getMessage();
+            log.warn("OpenAI API call failed: {}. Falling back to Mock Mode.", e.getMessage());
+            return callMockProvider(prompt) + "\n\n[Gateway Notice]: Live OpenAI call failed (" + e.getMessage() + "). Seamlessly processed via fallback mock engine.";
         }
     }
 
@@ -109,9 +174,11 @@ public class LlmGatewayService {
                     return (String) partsList.get(0).get("text");
                 }
             }
-            return "[Error]: Empty response from Gemini.";
+            log.warn("Gemini API returned empty candidates. Falling back to Mock Mode.");
+            return callMockProvider(prompt) + "\n\n[Gateway Notice]: Gemini returned empty candidates. Seamlessly routed via fallback mock engine.";
         } catch (Exception e) {
-            return "[AI Provider Error]: Failed calling Gemini API: " + e.getMessage();
+            log.warn("Gemini API call failed: {}. Falling back to Mock Mode.", e.getMessage());
+            return callMockProvider(prompt) + "\n\n[Gateway Notice]: Live Gemini call failed (" + e.getMessage() + "). Seamlessly processed via fallback mock engine.";
         }
     }
 

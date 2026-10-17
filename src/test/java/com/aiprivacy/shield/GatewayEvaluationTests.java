@@ -31,6 +31,12 @@ class GatewayEvaluationTests {
     @Autowired
     private AuditService auditService;
 
+    @Autowired
+    private LlmGatewayService llmGateway;
+
+    @Autowired
+    private com.aiprivacy.shield.controller.GatewayApiController gatewayController;
+
     // ==========================================
     // 1. PII & SENSITIVE DATA DETECTION BENCHMARK
     // ==========================================
@@ -175,5 +181,79 @@ class GatewayEvaluationTests {
         assertEquals("CREDENTIAL", lastEvent.getDetectedCategories());
         // Verify no raw string is stored in metadata columns
         assertFalse(lastEvent.getDetectedCategories().contains("SecretPassword999"));
+    }
+
+    // ==========================================
+    // 5. V2 GATEWAY ENHANCEMENT TESTS
+    // ==========================================
+
+    @Test
+    @DisplayName("Evaluation 5.1: Policy Profile Toggling (DEFAULT -> FINANCIAL_PII -> STRICT)")
+    void evaluatePolicyProfileToggling() {
+        assertEquals("DEFAULT", policyEngine.getActivePolicyName());
+
+        // Toggle to FINANCIAL_PII
+        gatewayController.setActivePolicy(Map.of("policy", "FINANCIAL_PII"));
+        assertEquals("FINANCIAL_PII", policyEngine.getActivePolicyName());
+
+        // Test that an unconfigured PromptRequest uses the new active policy
+        PromptRequest promptReq = new PromptRequest("Payment card 4012888888881881");
+        promptReq.setPolicy(null);
+        EvaluationResult eval = policyEngine.evaluatePrompt(promptReq);
+        assertEquals(ProtectionStrategy.MASK, policyEngine.getPolicy("FINANCIAL_PII").getStrategy());
+        assertTrue(eval.getProtectedPrompt().contains("****-****-****-1881"));
+
+        // Toggle to STRICT_COMPLIANCE
+        gatewayController.setActivePolicy(Map.of("policy", "STRICT_COMPLIANCE"));
+        assertEquals("STRICT_COMPLIANCE", policyEngine.getActivePolicyName());
+
+        // Reset back to DEFAULT
+        gatewayController.setActivePolicy(Map.of("policy", "DEFAULT"));
+        assertEquals("DEFAULT", policyEngine.getActivePolicyName());
+    }
+
+    @Test
+    @DisplayName("Evaluation 5.2: LLM Gateway Resolution and Mock Fallback Engine")
+    void evaluateLlmGatewayMockFallback() {
+        // Mock provider explicitly requested
+        String mockResponse = llmGateway.callModel("Hello safe prompt", "mock");
+        assertNotNull(mockResponse);
+        assertTrue(mockResponse.contains("Privacy Shield AI Gateway Output"));
+
+        // Unconfigured live provider gracefully falls back to mock
+        String fallbackResponse = llmGateway.callModel("Hello prompt", "non-existent-provider");
+        assertNotNull(fallbackResponse);
+        assertTrue(fallbackResponse.contains("Privacy Shield AI Gateway Output"));
+
+        // Verify provider telemetry status
+        Map<String, Object> status = llmGateway.getProviderStatus();
+        assertNotNull(status);
+        assertTrue(status.containsKey("activeProvider"));
+        assertTrue((Boolean) status.get("mockFallbackActive"));
+    }
+
+    @Test
+    @DisplayName("Evaluation 5.3: Document & Raw Text Scanning Endpoint (/api/scan-document)")
+    void evaluateDocumentScanEndpoint() {
+        String docContent = "CONFIDENTIAL CONTRACT\n" +
+                "Client: John Doe\n" +
+                "Email: j.doe@megacorp.com\n" +
+                "Payment Account: 4012888888881881\n" +
+                "API Access: sk-proj998877665544332211aabbcc";
+
+        DocumentScanRequest request = new DocumentScanRequest("Client_Agreement.pdf", docContent);
+        request.setPolicy("FINANCIAL_PII");
+
+        var response = gatewayController.scanDocument(request, null, null, null);
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Client_Agreement.pdf", body.get("documentName"));
+        assertEquals(true, body.get("success"));
+        assertTrue((Integer) body.get("findingsCount") >= 3);
+        assertFalse(((String) body.get("sanitizedContent")).contains("4012888888881881"));
+        assertNotNull(body.get("summary"));
     }
 }
