@@ -12,6 +12,8 @@ public class PromptRequest {
     private ProtectionStrategy overrideStrategy;
     private boolean userConfirmedOverride; // Review & Override flag
 
+    private String provider; // auto, mock, openai, gemini
+
     public PromptRequest() {}
 
     public PromptRequest(String prompt) {
@@ -29,4 +31,7 @@ public class PromptRequest {
 
     public boolean isUserConfirmedOverride() { return userConfirmedOverride; }
     public void setUserConfirmedOverride(boolean userConfirmedOverride) { this.userConfirmedOverride = userConfirmedOverride; }
+
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
 }

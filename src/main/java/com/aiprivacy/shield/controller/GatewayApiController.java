@@ -34,13 +34,53 @@ public class GatewayApiController {
         return Map.of(
                 "status", "healthy",
                 "service", "AI Privacy & Safety Gateway (Java)",
-                "activeModel", llmGateway.getActiveModelName()
+                "activeModel", llmGateway.getActiveModelName(),
+                "activePolicy", policyEngine.getActivePolicyName(),
+                "providers", llmGateway.getProviderStatus()
         );
     }
 
     @GetMapping("/policies")
     public Map<String, PrivacyPolicy> getPolicies() {
         return policyEngine.getAllPolicies();
+    }
+
+    @GetMapping("/policies/active")
+    public Map<String, Object> getActivePolicy() {
+        String active = policyEngine.getActivePolicyName();
+        return Map.of(
+                "activePolicy", active,
+                "policy", policyEngine.getPolicy(active)
+        );
+    }
+
+    @PostMapping("/policies/active")
+    public ResponseEntity<Map<String, Object>> setActivePolicy(@RequestBody Map<String, String> body) {
+        String policyName = body.get("policy");
+        if (policyName == null || policyName.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing 'policy' parameter"));
+        }
+        policyEngine.setActivePolicyName(policyName);
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Active policy updated to " + policyEngine.getActivePolicyName(),
+                "activePolicy", policyEngine.getActivePolicyName(),
+                "policy", policyEngine.getPolicy(policyEngine.getActivePolicyName())
+        ));
+    }
+
+    @PutMapping("/policies/{name}")
+    public ResponseEntity<?> updatePolicy(@PathVariable String name, @RequestBody PrivacyPolicy updatedPolicy) {
+        PrivacyPolicy updated = policyEngine.updatePolicy(name, updatedPolicy);
+        if (updated == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Policy not found: " + name));
+        }
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/providers")
+    public Map<String, Object> getProviders() {
+        return llmGateway.getProviderStatus();
     }
 
     @GetMapping("/stats")
@@ -127,8 +167,9 @@ public class GatewayApiController {
 
         // Send ONLY the protected/sanitized prompt to the AI Model
         String safePromptToSend = eval.getProtectedPrompt();
-        String activeModel = llmGateway.getActiveModelName();
-        String rawAiAnswer = llmGateway.callModel(safePromptToSend);
+        String requestedProvider = request.getProvider();
+        String activeModel = llmGateway.getActiveModelName(requestedProvider);
+        String rawAiAnswer = llmGateway.callModel(safePromptToSend, requestedProvider);
 
         // Apply reversible de-tokenization to the AI response if tokens were used
         String finalAiAnswer = sanitizer.detokenize(rawAiAnswer, eval.getTokenMap());
@@ -155,6 +196,78 @@ public class GatewayApiController {
         response.setUserMessage("Safely routed through Gateway. AI provider received protected prompt only.");
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Document & PDF raw text scanner endpoint.
+     * Evaluates document text, detects all PII & secrets, and returns protected sanitized text.
+     */
+    @PostMapping("/scan-document")
+    public ResponseEntity<Map<String, Object>> scanDocument(@RequestBody(required = false) DocumentScanRequest request,
+                                                           @RequestParam(value = "text", required = false) String rawTextParam,
+                                                           @RequestParam(value = "documentName", required = false) String docNameParam,
+                                                           @RequestParam(value = "policy", required = false) String policyParam) {
+        long start = System.currentTimeMillis();
+
+        String content = "";
+        String documentName = "Scanned_Document.txt";
+        String policy = policyEngine.getActivePolicyName();
+        ProtectionStrategy strategy = null;
+
+        if (request != null) {
+            content = request.getContent();
+            documentName = request.getDocumentName();
+            if (request.getPolicy() != null && !request.getPolicy().isBlank()) {
+                policy = request.getPolicy();
+            }
+            strategy = request.getOverrideStrategy();
+        } else if (rawTextParam != null) {
+            content = rawTextParam;
+            if (docNameParam != null) documentName = docNameParam;
+            if (policyParam != null) policy = policyParam;
+        }
+
+        PromptRequest promptReq = new PromptRequest(content);
+        promptReq.setPolicy(policy);
+        promptReq.setOverrideStrategy(strategy);
+
+        EvaluationResult eval = policyEngine.evaluatePrompt(promptReq);
+        long latency = System.currentTimeMillis() - start;
+
+        String action = eval.isBlocked() ? "BLOCKED" : (eval.getFindings().isEmpty() ? "PASSED" : "SANITIZED");
+
+        auditService.recordEvent(
+                policy,
+                action,
+                eval,
+                strategy != null ? strategy.name() : "AUTO",
+                "DOCUMENT_SCANNER",
+                latency
+        );
+
+        Map<String, Object> docResponse = new java.util.LinkedHashMap<>();
+        docResponse.put("success", true);
+        docResponse.put("documentName", documentName);
+        docResponse.put("characterCount", content.length());
+        docResponse.put("wordCount", content.isBlank() ? 0 : content.trim().split("\\s+").length);
+        docResponse.put("policy", policy);
+        docResponse.put("riskLevel", eval.getRiskLevel().name());
+        docResponse.put("blocked", eval.isBlocked());
+        docResponse.put("blockReason", eval.getBlockReason());
+        docResponse.put("actionTaken", action);
+        docResponse.put("findingsCount", eval.getFindings().size());
+        docResponse.put("detections", eval.getFindings());
+        docResponse.put("injectionFlags", eval.getInjectionFlags());
+        docResponse.put("sanitizedContent", eval.getProtectedPrompt());
+        docResponse.put("tokenMapping", eval.getTokenMap());
+        docResponse.put("latencyMs", latency);
+        docResponse.put("summary", eval.isBlocked()
+                ? "Document blocked by security policy: " + eval.getBlockReason()
+                : (eval.getFindings().isEmpty()
+                    ? "No sensitive PII found. Document is clean and safe."
+                    : eval.getFindings().size() + " sensitive entities detected and sanitized successfully."));
+
+        return ResponseEntity.ok(docResponse);
     }
 
     /**
