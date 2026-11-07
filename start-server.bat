@@ -1,14 +1,23 @@
 @echo off
-title Privacy & Safety Gateway - Spring Boot Server
+title ProtectoShield - Spring Boot Server
 color 0A
 
 echo ============================================================
-echo   Privacy ^& Safety Gateway for AI - Server Startup
+echo   ProtectoShield - AI Privacy ^& Safety Gateway Server
 echo ============================================================
 echo.
 
-REM Change to project directory (same folder as this script)
 cd /d "%~dp0"
+
+REM Check if port 8080 is already running
+netstat -ano | findstr :8080 | findstr LISTENING >nul 2>&1
+if not errorlevel 1 (
+    echo [INFO] ProtectoShield is already active on http://localhost:8080!
+    echo [INFO] Opening browser...
+    start http://localhost:8080
+    timeout /t 3 >nul
+    exit /b 0
+)
 
 REM Check if Java is available
 java -version >nul 2>&1
@@ -30,14 +39,10 @@ if errorlevel 1 (
 
 echo [INFO] Java and Maven found. Starting server...
 echo [INFO] Server will be available at: http://localhost:8080
-echo [INFO] H2 Database Console:         http://localhost:8080/h2-console
-echo [INFO] API Health Check:            http://localhost:8080/api/health
-echo.
-echo [INFO] Press Ctrl+C to stop the server.
-echo ============================================================
+echo [INFO] Opening browser in 5 seconds...
 echo.
 
-REM Run the Spring Boot application using Maven
+start "" cmd /c "timeout /t 5 >nul && start http://localhost:8080"
 mvn spring-boot:run
 
 echo.
