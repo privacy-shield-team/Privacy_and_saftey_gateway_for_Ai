@@ -49,6 +49,31 @@ public class AuditService {
         return auditRepo.findTop100ByOrderByIdDesc();
     }
 
+    public String generateCsvExport() {
+        List<AuditEvent> events = auditRepo.findAll();
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID,Timestamp,Policy,Action,RiskLevel,FindingsCount,DetectedCategories,ThreatFlags,Strategy,ModelUsed,LatencyMs\n");
+        for (AuditEvent ev : events) {
+            sb.append(ev.getId()).append(",")
+              .append("\"").append(ev.getTimestamp() != null ? ev.getTimestamp().toString() : "").append("\",")
+              .append("\"").append(escapeCsv(ev.getPolicyName())).append("\",")
+              .append("\"").append(escapeCsv(ev.getAction())).append("\",")
+              .append("\"").append(escapeCsv(ev.getRiskLevel())).append("\",")
+              .append(ev.getDetectionCount()).append(",")
+              .append("\"").append(escapeCsv(ev.getDetectedCategories())).append("\",")
+              .append("\"").append(escapeCsv(ev.getInjectionFlags())).append("\",")
+              .append("\"").append(escapeCsv(ev.getStrategyApplied())).append("\",")
+              .append("\"").append(escapeCsv(ev.getModelUsed())).append("\",")
+              .append(ev.getLatencyMs()).append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String escapeCsv(String val) {
+        if (val == null) return "";
+        return val.replace("\"", "\"\"");
+    }
+
     public Map<String, Object> getStatistics() {
         long total = auditRepo.count();
         long blocked = auditRepo.countByAction("BLOCKED");

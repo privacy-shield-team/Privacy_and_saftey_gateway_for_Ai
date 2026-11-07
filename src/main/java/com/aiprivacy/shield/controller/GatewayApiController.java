@@ -3,11 +3,12 @@ package com.aiprivacy.shield.controller;
 import com.aiprivacy.shield.model.*;
 import com.aiprivacy.shield.service.*;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -18,15 +19,18 @@ public class GatewayApiController {
     private final SanitizerService sanitizer;
     private final AuditService auditService;
     private final LlmGatewayService llmGateway;
+    private final TokenVaultService tokenVaultService;
 
     public GatewayApiController(PolicyEngineService policyEngine,
                                 SanitizerService sanitizer,
                                 AuditService auditService,
-                                LlmGatewayService llmGateway) {
+                                LlmGatewayService llmGateway,
+                                TokenVaultService tokenVaultService) {
         this.policyEngine = policyEngine;
         this.sanitizer = sanitizer;
         this.auditService = auditService;
         this.llmGateway = llmGateway;
+        this.tokenVaultService = tokenVaultService;
     }
 
     @GetMapping("/health")
@@ -83,6 +87,37 @@ public class GatewayApiController {
         return llmGateway.getProviderStatus();
     }
 
+    @PostMapping("/providers/test")
+    public ResponseEntity<Map<String, Object>> testProviderConnection(@RequestBody(required = false) Map<String, String> body) {
+        String provider = (body != null) ? body.get("provider") : "mock";
+        Map<String, Object> testResult = llmGateway.testProvider(provider);
+        return ResponseEntity.ok(testResult);
+    }
+
+    @PostMapping("/providers/config")
+    public ResponseEntity<Map<String, Object>> updateProviderConfiguration(@RequestBody Map<String, String> body) {
+        String provider = body.get("provider");
+        String apiKey = body.get("apiKey");
+        String model = body.get("model");
+
+        if ("openai".equalsIgnoreCase(provider)) {
+            llmGateway.updateOpenAiConfig(apiKey, model);
+        } else if ("gemini".equalsIgnoreCase(provider)) {
+            llmGateway.updateGeminiConfig(apiKey, model);
+        } else {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", "Unsupported provider: " + provider + ". Use 'openai' or 'gemini'."
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", provider.toUpperCase() + " configuration updated successfully.",
+                "providerStatus", llmGateway.getProviderStatus()
+        ));
+    }
+
     @GetMapping("/stats")
     public Map<String, Object> getStats() {
         return auditService.getStatistics();
@@ -91,6 +126,17 @@ public class GatewayApiController {
     @GetMapping("/audit")
     public ResponseEntity<?> getAuditEvents() {
         return ResponseEntity.ok(auditService.getRecentEvents());
+    }
+
+    /**
+     * Export zero-secret immutable audit ledger as CSV for compliance.
+     */
+    @GetMapping(value = "/audit/export", produces = "text/csv")
+    public ResponseEntity<String> exportAuditEvents() {
+        String csv = auditService.generateCsvExport();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"protectoshield-audit-events.csv\"")
+                .body(csv);
     }
 
     /**
@@ -113,6 +159,11 @@ public class GatewayApiController {
                 latency
         );
 
+        // Register tokens in ephemeral vault
+        if (eval.getTokenMap() != null && !eval.getTokenMap().isEmpty()) {
+            tokenVaultService.registerTokens(eval.getTokenMap());
+        }
+
         GatewayResponse response = new GatewayResponse();
         response.setSuccess(true);
         response.setBlocked(eval.isBlocked());
@@ -125,6 +176,10 @@ public class GatewayApiController {
         response.setProtectedPrompt(eval.getProtectedPrompt());
         response.setTokenMapping(eval.getTokenMap());
         response.setProviderUsed("LOCAL_ANALYZER");
+        response.setLatencyMs(latency);
+        response.setPolicy(request.getPolicy());
+        response.setRawModelAnswer(null);
+        response.setStrategyApplied(request.getOverrideStrategy() != null ? request.getOverrideStrategy().name() : policyEngine.getPolicy(request.getPolicy()).getStrategy().name());
 
         if (eval.isBlocked()) {
             response.setUserMessage("Prompt rejected by privacy gateway: " + eval.getBlockReason());
@@ -139,13 +194,24 @@ public class GatewayApiController {
 
     /**
      * Intercept, sanitize, and transmit prompt to GenAI API with automatic de-tokenization.
+     * Supports multi-turn conversations via conversationId and history fields.
      */
     @PostMapping("/chat")
     public ResponseEntity<GatewayResponse> chatWithGateway(@Valid @RequestBody PromptRequest request) {
         long start = System.currentTimeMillis();
+
+        // Assign conversation ID if not provided
+        String conversationId = request.getConversationId();
+        if (conversationId == null || conversationId.isBlank()) {
+            conversationId = UUID.randomUUID().toString();
+        }
+
+        // Evaluate current user prompt through privacy pipeline
         EvaluationResult eval = policyEngine.evaluatePrompt(request);
 
         // Security check: If blocked and user has not confirmed override
+        String strategyApplied = request.getOverrideStrategy() != null ? request.getOverrideStrategy().name() : policyEngine.getPolicy(request.getPolicy()).getStrategy().name();
+
         if (eval.isBlocked() && !request.isUserConfirmedOverride()) {
             long latency = System.currentTimeMillis() - start;
             auditService.recordEvent(request.getPolicy(), "BLOCKED", eval, "NONE", "BLOCKED_BEFORE_PROVIDER", latency);
@@ -160,19 +226,128 @@ public class GatewayApiController {
             blockedResponse.setInjectionFlags(eval.getInjectionFlags());
             blockedResponse.setOriginalPrompt(request.getPrompt());
             blockedResponse.setProtectedPrompt(null); // Never expose unredacted prompt
+            blockedResponse.setRawModelAnswer(null);
+            blockedResponse.setStrategyApplied(strategyApplied);
             blockedResponse.setUserMessage("REQUEST BLOCKED BEFORE AI CALL: " + eval.getBlockReason());
+            blockedResponse.setLatencyMs(latency);
+            blockedResponse.setPolicy(request.getPolicy());
+            blockedResponse.setConversationId(conversationId);
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(blockedResponse);
         }
 
-        // Send ONLY the protected/sanitized prompt to the AI Model
+        // Register current turn tokens in conversation-scoped vault
+        if (eval.getTokenMap() != null && !eval.getTokenMap().isEmpty()) {
+            tokenVaultService.registerTokens(conversationId, eval.getTokenMap());
+        }
+
+        // Build sanitized multi-turn conversation messages for the AI provider
         String safePromptToSend = eval.getProtectedPrompt();
         String requestedProvider = request.getProvider();
-        String activeModel = llmGateway.getActiveModelName(requestedProvider);
-        String rawAiAnswer = llmGateway.callModel(safePromptToSend, requestedProvider);
+        String requestedModel = request.getModel();
+        String activeModel = llmGateway.getActiveModelName(requestedProvider, requestedModel);
+        String resolvedProvider = llmGateway.resolveProvider(requestedProvider);
+        boolean isMockMode = "mock".equalsIgnoreCase(resolvedProvider);
 
-        // Apply reversible de-tokenization to the AI response if tokens were used
-        String finalAiAnswer = sanitizer.detokenize(rawAiAnswer, eval.getTokenMap());
+        String rawAiAnswer;
+        try {
+            List<ChatMessage> incomingHistory = request.getHistory();
+            if (incomingHistory != null && !incomingHistory.isEmpty()) {
+                java.util.List<ChatMessage> conversationMessages = new java.util.ArrayList<>();
+
+                for (ChatMessage msg : incomingHistory) {
+                    if (msg == null || msg.getContent() == null || msg.getContent().isBlank()) continue;
+
+                    if ("assistant".equalsIgnoreCase(msg.getRole())) {
+                        // Assistant messages pass through directly (they were already detokenized or safe answers)
+                        conversationMessages.add(new ChatMessage("assistant", msg.getContent()));
+                    } else if ("user".equalsIgnoreCase(msg.getRole())) {
+                        // DEFENSIVE SANITIZATION: Never trust frontend or client history as already sanitized.
+                        // Re-evaluate prior user message against active policy to guarantee zero PII leakage.
+                        PromptRequest priorReq = new PromptRequest(msg.getContent());
+                        priorReq.setPolicy(request.getPolicy());
+                        priorReq.setOverrideStrategy(request.getOverrideStrategy());
+
+                        EvaluationResult priorEval = policyEngine.evaluatePrompt(priorReq);
+
+                        // If a malicious attack was slipped into history, block immediately
+                        if (priorEval.isBlocked() && !request.isUserConfirmedOverride()) {
+                            long latency = System.currentTimeMillis() - start;
+                            auditService.recordEvent(request.getPolicy(), "BLOCKED", priorEval, "NONE", "BLOCKED_HISTORY_INJECTION", latency);
+
+                            GatewayResponse blockedResponse = new GatewayResponse();
+                            blockedResponse.setSuccess(false);
+                            blockedResponse.setBlocked(true);
+                            blockedResponse.setBlockReason("Security violation detected in conversation history: " + priorEval.getBlockReason());
+                            blockedResponse.setRiskLevel(priorEval.getRiskLevel());
+                            blockedResponse.setActionTaken("BLOCKED");
+                            blockedResponse.setDetections(priorEval.getFindings());
+                            blockedResponse.setInjectionFlags(priorEval.getInjectionFlags());
+                            blockedResponse.setRawModelAnswer(null);
+                            blockedResponse.setStrategyApplied(strategyApplied);
+                            blockedResponse.setUserMessage("REQUEST BLOCKED BEFORE AI CALL: Malicious pattern in conversation history.");
+                            blockedResponse.setLatencyMs(latency);
+                            blockedResponse.setPolicy(request.getPolicy());
+                            blockedResponse.setConversationId(conversationId);
+
+                            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(blockedResponse);
+                        }
+
+                        // Register any prior tokens into the conversation vault
+                        if (priorEval.getTokenMap() != null && !priorEval.getTokenMap().isEmpty()) {
+                            tokenVaultService.registerTokens(conversationId, priorEval.getTokenMap());
+                        }
+
+                        // Always add the sanitized/protected text, never raw text!
+                        conversationMessages.add(new ChatMessage("user", priorEval.getProtectedPrompt()));
+                    }
+                }
+
+                // Append the current turn's protected prompt
+                conversationMessages.add(new ChatMessage("user", safePromptToSend));
+
+                rawAiAnswer = llmGateway.callModelWithHistory(conversationMessages, requestedProvider, requestedModel);
+            } else {
+                // Single-turn: just send the protected prompt
+                rawAiAnswer = llmGateway.callModel(safePromptToSend, requestedProvider, requestedModel);
+            }
+        } catch (Exception e) {
+            // If AI provider call fails, return error without falling back to mock silently
+            long latency = System.currentTimeMillis() - start;
+            String action = eval.getFindings().isEmpty() ? "PASSED" : "SANITIZED";
+            auditService.recordEvent(request.getPolicy(), action + "_PROVIDER_ERROR", eval,
+                    request.getOverrideStrategy() != null ? request.getOverrideStrategy().name() : "AUTO",
+                    activeModel, latency);
+
+            GatewayResponse errorResponse = new GatewayResponse();
+            errorResponse.setSuccess(false);
+            errorResponse.setBlocked(false);
+            errorResponse.setRiskLevel(eval.getRiskLevel());
+            errorResponse.setActionTaken(action);
+            errorResponse.setDetections(eval.getFindings());
+            errorResponse.setInjectionFlags(eval.getInjectionFlags());
+            errorResponse.setOriginalPrompt(request.getPrompt());
+            errorResponse.setProtectedPrompt(safePromptToSend);
+            errorResponse.setRawModelAnswer(null);
+            errorResponse.setStrategyApplied(strategyApplied);
+            errorResponse.setModelAnswer("❌ **AI Provider Error**\n\n" + e.getMessage()
+                    + "\n\nPlease check your API key configuration in Settings or environment variables.");
+            errorResponse.setProviderUsed(activeModel);
+            errorResponse.setUserMessage("AI provider call failed: " + e.getMessage());
+            errorResponse.setLatencyMs(latency);
+            errorResponse.setPolicy(request.getPolicy());
+            errorResponse.setConversationId(conversationId);
+            errorResponse.setMockMode(false);
+
+            return ResponseEntity.ok(errorResponse);
+        }
+
+        // Apply reversible de-tokenization to the AI response using conversation-scoped token map
+        Map<String, String> conversationTokenMap = new LinkedHashMap<>(tokenVaultService.getTokensForConversation(conversationId));
+        if (eval.getTokenMap() != null && !eval.getTokenMap().isEmpty()) {
+            conversationTokenMap.putAll(eval.getTokenMap());
+        }
+        String finalAiAnswer = sanitizer.detokenize(rawAiAnswer, conversationTokenMap);
 
         long latency = System.currentTimeMillis() - start;
         String action = request.isUserConfirmedOverride() ? "OVERRIDDEN" : (eval.getFindings().isEmpty() ? "PASSED" : "SANITIZED");
@@ -190,10 +365,16 @@ public class GatewayApiController {
         response.setInjectionFlags(eval.getInjectionFlags());
         response.setOriginalPrompt(request.getPrompt());
         response.setProtectedPrompt(safePromptToSend);
+        response.setRawModelAnswer(rawAiAnswer);
+        response.setStrategyApplied(strategyApplied);
         response.setModelAnswer(finalAiAnswer);
         response.setProviderUsed(activeModel);
-        response.setTokenMapping(eval.getTokenMap());
+        response.setTokenMapping(conversationTokenMap);
         response.setUserMessage("Safely routed through Gateway. AI provider received protected prompt only.");
+        response.setLatencyMs(latency);
+        response.setPolicy(request.getPolicy());
+        response.setConversationId(conversationId);
+        response.setMockMode(isMockMode);
 
         return ResponseEntity.ok(response);
     }

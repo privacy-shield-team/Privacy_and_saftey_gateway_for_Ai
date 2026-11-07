@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: privacy-safety-gateway-ai
+    env: java
+    plan: free
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/ai-privacy-shield-1.0.0.jar --server.port=$PORT
+    envVars:
+      - key: AI_PROVIDER
+        value: mock
+      - key: JAVA_VERSION
+        value: 17

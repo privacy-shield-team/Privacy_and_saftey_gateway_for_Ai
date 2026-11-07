@@ -13,6 +13,10 @@ public class PromptRequest {
     private boolean userConfirmedOverride; // Review & Override flag
 
     private String provider; // auto, mock, openai, gemini
+    private String model;    // specific model e.g. gpt-4o-mini, gpt-4o, gemini-1.5-flash
+
+    private String conversationId;
+    private java.util.List<ChatMessage> history = new java.util.ArrayList<>();
 
     public PromptRequest() {}
 
@@ -34,4 +38,13 @@ public class PromptRequest {
 
     public String getProvider() { return provider; }
     public void setProvider(String provider) { this.provider = provider; }
+
+    public String getModel() { return model; }
+    public void setModel(String model) { this.model = model; }
+
+    public String getConversationId() { return conversationId; }
+    public void setConversationId(String conversationId) { this.conversationId = conversationId; }
+
+    public java.util.List<ChatMessage> getHistory() { return history; }
+    public void setHistory(java.util.List<ChatMessage> history) { this.history = history; }
 }
