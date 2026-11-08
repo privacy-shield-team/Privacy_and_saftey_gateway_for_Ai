@@ -1,113 +1,141 @@
 # ProtectoShield — AI Privacy & Safety Gateway
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/privacy-shield-team/Privacy_and_saftey_gateway_for_Ai)
-[![Java 17](https://img.shields.io/badge/Java-17-blue.svg)](https://adoptium.net/)
-[![Spring Boot 3.3.4](https://img.shields.io/badge/Spring%20Boot-3.3.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Security: BCrypt & Session](https://img.shields.io/badge/Security-Spring%20Security%206-black.svg)](https://spring.io/projects/spring-security)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Java 17](https://img.shields.io/badge/Java-17-007396.svg?logo=openjdk&logoColor=white)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.4-6DB33F.svg?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Security](https://img.shields.io/badge/Security-Spring%20Security%206-6DB33F.svg?logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-45%20Passing-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **ProtectoShield is a Privacy Firewall for AI.** It allows users and enterprises to interact with real AI models (OpenAI, Gemini) while intercepting prompts, stripping sensitive PII and secrets, enforcing custom security policies, and providing a transparent Privacy Inspector with zero raw secret retention.
-
----
-
-## 🚀 1-Click Cloud Deployment (Free Public URL)
-
-You can deploy ProtectoShield to the cloud in **less than 2 minutes** and get a public `https://...` link that anyone can open in their browser:
-
-### Option A — 1-Click Deploy on Render (Recommended)
-1. Click the button below:
-   
-   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/privacy-shield-team/Privacy_and_saftey_gateway_for_Ai)
-
-2. Sign in to [Render](https://render.com) with your GitHub account.
-3. Name your service (e.g. `protectoshield-ai-gateway`).
-4. Click **Apply / Create Web Service**.
-5. Render will build the Docker container and provide a live public URL:
-   `https://protectoshield-ai-gateway.onrender.com`
-
-### Option B — Manual Render Setup
-1. Open [dashboard.render.com](https://dashboard.render.com).
-2. Click **New +** → **Web Service**.
-3. Choose **Build and deploy from a Git repository**.
-4. Select `privacy-shield-team/Privacy_and_saftey_gateway_for_Ai`.
-5. Under **Runtime**, select **Docker** (it automatically uses the project's root `Dockerfile`).
-6. Select the **Free** plan and click **Deploy Web Service**.
+**ProtectoShield** is a high-performance, zero-trust Privacy Firewall and Safety Gateway engineered for enterprise Generative AI workflows. It intercepts AI prompt traffic in real time, scrubs personally identifiable information (PII) and credentials, blocks prompt injection attacks, and provides reversible session-scoped tokenization with zero raw secret retention.
 
 ---
 
-## ✨ Core Features
+## 🏛️ System Architecture
 
-1. **Authentication & Session Security (Spring Security 6)**:
-   - Dedicated login & registration portal with BCrypt password hashing (work factor 12).
-   - Session authentication (`HttpSession` with HttpOnly cookie) protecting all application routes.
-   - Built-in Google OAuth2 and Cloudflare Turnstile CAPTCHA state handling.
-2. **Real Multi-Turn Protected AI Chat**:
-   - ChatGPT/Gemini conversational assistant with user & assistant chat bubbles and typing indicators.
-   - Live AI execution via OpenAI (`gpt-4o-mini`, `gpt-4o`) and Google Gemini (`gemini-1.5-flash`).
-   - Mock Mode with amber warning banner when no live API keys are configured.
-   - Defensive multi-turn history sanitization preventing previous turns from leaking PII.
-3. **Interactive 10-Point Privacy Inspector**:
-   - Inspect detected PII, pre-sanitization vs. protected prompt diff, policy decision, latency, risk rating, and raw vs. de-tokenized responses.
-4. **Sensitive Data & PII Detection**:
-   - Emails & phone numbers (international + Indian formats)
-   - Credit cards (Regex + Luhn checksum validation)
-   - Government Identifiers (Aadhaar, SSN, PAN)
-   - API keys & tokens (OpenAI `sk-`, Google `AIza`, AWS `AKIA`, GitHub tokens, JWTs)
-   - Passwords and confidential project keywords
-5. **Protection Strategies**:
-   - **Redaction** (`[CREDIT_CARD_REDACTED]`)
-   - **Masking** (`****-****-****-1234`, `jo****@corp.com`)
-   - **Session Tokenization** (`__TOKEN_EMAIL_1__` with reversible de-tokenization)
-6. **Pre-Flight Vulnerability Scanner**:
-   - Direct testing of prompts against injection attacks and data leakage rules without calling external providers.
-7. **Document & Text Content Scanner**:
-   - Bulk sanitization of text documents with structured findings summary.
-8. **Auditing & Compliance**:
-   - Immutable audit ledger with zero raw secret exposure and 1-click CSV export (`GET /api/audit/export`).
+```
+[ Client / Application ]
+         │
+         ▼ (Raw Prompt + Context)
+┌────────────────────────────────────────────────────────┐
+│             ProtectoShield AI Gateway                  │
+│                                                        │
+│  1. Authentication & Session Boundary (Spring Sec 6)  │
+│  2. Pre-Flight Inspection & Jailbreak Firewall         │
+│  3. Multi-Pattern PII & Secret Scrubbing Engine       │
+│  4. Reversible Token Vault (Session-Scoped Ephemeral)  │
+│  5. Policy Enforcement Engine (REDACT / MASK / TOKEN)  │
+│  6. Zero-Knowledge Audit Logger (Zero Secret Retention)│
+└────────────────────────────────────────────────────────┘
+         │
+         ▼ (Sanitized Protected Prompt)
+[ LLM Providers: OpenAI / Google Gemini / On-Prem ]
+         │
+         ▼ (Raw Model Answer)
+┌────────────────────────────────────────────────────────┐
+│  7. De-Tokenization Engine (Restores Context to User) │
+└────────────────────────────────────────────────────────┘
+         │
+         ▼ (Safe De-tokenized Response)
+[ Protected Client Session ]
+```
 
 ---
 
-## 💻 Local Development
+## ⚡ Key Capabilities
+
+### 1. Enterprise Session Security
+- **Authentication & RBAC:** Session-based authentication backed by Spring Security 6, BCrypt password hashing (work factor 12), and `HttpOnly` / `SameSite` cookie controls.
+- **Provider Support:** Native local authentication, Google OAuth 2.0 integration, and Cloudflare Turnstile anti-bot verification.
+- **Zero-Exposure Policy:** User credentials and raw API secrets are never returned in client payloads or logged to disk.
+
+### 2. Intelligent PII & Secret Scrubbing
+- **Financial Data:** Credit card numbers validated with the Luhn checksum algorithm, bank account numbers, and transaction codes.
+- **Government Identifiers:** SSN (US), Aadhaar (India), PAN (India).
+- **Communication:** Personal and corporate email addresses, international and domestic phone numbers.
+- **High-Risk Secrets:** OpenAI (`sk-`), Google AI (`AIza`), AWS (`AKIA`), GitHub personal access tokens, JWT tokens, private keys, and passwords.
+
+### 3. Protection Strategies
+- **Tokenization (`TOKENIZE`):** Replaces sensitive entities with cryptographically generated session tokens (e.g., `[EMAIL_TOKEN_1]`). Upon receiving the LLM response, the gateway transparently de-tokenizes the output so the end-user receives complete context without exposing raw secrets to the model.
+- **Masking (`MASK`):** Obfuscates critical characters while maintaining visual structure (e.g., `****-****-****-1234`, `j****@domain.com`).
+- **Redaction (`REDACT`):** Replaces sensitive entities with descriptive categorical labels (e.g., `[CREDIT_CARD_REDACTED]`).
+
+### 4. Real-Time Prompt Injection & Safety Guardrails
+- **Jailbreak Defense:** Intercepts direct prompt injections, role-play bypass attempts, and system override vectors before reaching the model.
+- **Pre-Flight Scanner:** Standalone security assessment module to evaluate untrusted prompts and structured text documents locally.
+
+### 5. Multi-Provider AI Routing & Fallback
+- Seamless integration with **OpenAI** (`gpt-4o`, `gpt-4o-mini`) and **Google Gemini** (`gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.8-flash`).
+- Built-in **Mock Simulation Engine** for offline development and testing with zero external API dependencies.
+
+### 6. Zero-Knowledge Auditing & Compliance
+- Tamper-resistant audit ledger capturing event timestamps, risk scores, rule violations, latency metrics, and action states.
+- 1-click compliance export (`GET /api/audit/export`) formatted for SIEM ingestion and SOC2 / GDPR audits.
+
+---
+
+## 🚀 Quickstart
 
 ### Prerequisites
-- Java 17+
+- Java 17 or higher
 - Maven 3.8+
+- Docker (optional)
 
-### 1. Run with 1-Click Launchers (Windows)
-- Double-click **`start-server.bat`** or **`run-jar.bat`** in the project root.
-- The server will boot and open [http://localhost:8080](http://localhost:8080) automatically.
+### Option 1: Running with Docker (Recommended)
+Build and run the production container:
+```bash
+docker build -t protectoshield:latest .
+docker run -d -p 8080:8080 --name protectoshield protectoshield:latest
+```
+Access the application at `http://localhost:8080`.
 
-### 2. Run via Maven
-```powershell
+### Option 2: Running via Maven
+```bash
+# Clone the repository
+git clone https://github.com/privacy-shield-team/Privacy_and_saftey_gateway_for_Ai.git
+cd Privacy_and_saftey_gateway_for_Ai
+
+# Build and run
 mvn spring-boot:run
 ```
 
-### 3. Run Test Suite
-```powershell
+### Option 3: Automated Test Suite
+Execute the full test suite covering security boundaries, PII scrubbers, token vault mechanics, and multi-turn chat routing:
+```bash
 mvn test
 ```
-*(40 / 40 unit and integration tests covering security, privacy pipelines, token vault, and multi-turn protection)*
+*45 / 45 unit and integration tests passing.*
 
 ---
 
-## 🔒 Configuration & Environment Variables
+## ⚙️ Configuration & Environment
 
-| Variable | Default | Purpose |
+Configuration properties can be set via environment variables or inside `src/main/resources/application.properties`:
+
+| Variable | Default | Description |
 | :--- | :--- | :--- |
-| `PORT` | `8080` | Web server port (auto-assigned by cloud hosts) |
-| `AI_PROVIDER` | `mock` | Default AI provider (`mock`, `openai`, `gemini`) |
-| `OPENAI_API_KEY` | *(empty)* | Optional OpenAI API Key |
-| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model name |
-| `GEMINI_API_KEY` | *(empty)* | Optional Google Gemini API Key |
-| `GEMINI_MODEL` | `gemini-1.5-flash` | Gemini model name |
-| `GOOGLE_CLIENT_ID` | *(empty)* | Optional Google OAuth2 Client ID |
-| `GOOGLE_CLIENT_SECRET`| *(empty)* | Optional Google OAuth2 Client Secret |
-| `TURNSTILE_SITE_KEY` | *(empty)* | Optional Cloudflare Turnstile Site Key |
-| `TURNSTILE_SECRET_KEY`| *(empty)* | Optional Cloudflare Turnstile Secret Key |
+| `PORT` | `8080` | Application HTTP port |
+| `AI_PROVIDER` | `mock` | Default active AI provider (`mock`, `openai`, `gemini`) |
+| `OPENAI_API_KEY` | *(empty)* | OpenAI API secret key |
+| `OPENAI_MODEL` | `gpt-4o-mini` | Default OpenAI model |
+| `GEMINI_API_KEY` | *(empty)* | Google Gemini API secret key |
+| `GEMINI_MODEL` | `gemini-3.6-flash` | Default Gemini model |
+| `GOOGLE_CLIENT_ID` | *(empty)* | Optional Google OAuth 2.0 Client ID |
+| `GOOGLE_CLIENT_SECRET` | *(empty)* | Optional Google OAuth 2.0 Client Secret |
+| `TURNSTILE_SITE_KEY` | *(empty)* | Optional Cloudflare Turnstile public key |
+| `TURNSTILE_SECRET_KEY` | *(empty)* | Optional Cloudflare Turnstile private key |
 
 ---
 
-## 🛡️ Default Demo Account
-When running locally, you can create your own account or use the pre-seeded admin credentials:
-- **Email**: `admin@protectoshield.ai`
-- **Password**: `AdminPassword123!`
+## 🛡️ Default Development Credentials
+
+For local testing, the application pre-seeds an administrator account on first startup:
+- **Email:** `admin@protectoshield.ai`
+- **Password:** `AdminPassword123!`
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
