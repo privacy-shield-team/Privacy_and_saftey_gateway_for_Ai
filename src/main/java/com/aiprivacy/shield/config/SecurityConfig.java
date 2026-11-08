@@ -66,6 +66,7 @@ public class SecurityConfig {
                     "/app.js",
                     "/favicon.ico",
                     "/auth/**",
+                    "/api/health",
                     "/h2-console/**"
                 ).permitAll()
                 // All API endpoints and main app require session auth (checked in filter)

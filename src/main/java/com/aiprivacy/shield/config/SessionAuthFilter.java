@@ -61,6 +61,7 @@ public class SessionAuthFilter extends OncePerRequestFilter {
     private boolean isPublicPath(String path) {
         return path.equals("/login.html")
                 || path.startsWith("/auth/")
+                || path.equals("/api/health")
                 || path.equals("/styles.css")
                 || path.equals("/app.js")
                 || path.equals("/favicon.ico")
