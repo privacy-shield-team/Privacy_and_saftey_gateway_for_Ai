@@ -414,7 +414,7 @@ class GatewayEvaluationTests {
     @DisplayName("Evaluation 7.2: Provider Error Sanitization (Zero API Key Leakage)")
     void evaluateProviderErrorSanitization() {
         // Test that any internal connection errors or HTTP responses with API keys in query or headers get scrubbed
-        String leakedRawMessage = "401 Unauthorized from POST https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAABBCC1122334455 with Bearer sk-proj998877665544332211";
+        String leakedRawMessage = "401 Unauthorized from POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=AIzaSyAABBCC1122334455 with Bearer sk-proj998877665544332211";
         String sanitized = LlmGatewayService.sanitizeErrorMessage(leakedRawMessage);
 
         assertNotNull(sanitized);
@@ -477,7 +477,7 @@ class GatewayEvaluationTests {
     void evaluatePerRequestModelRouting() {
         // Temporarily configure keys for routing resolution test
         llmGateway.updateOpenAiConfig("sk-test-mock-key-1234567890", "gpt-4o");
-        llmGateway.updateGeminiConfig("AIzaSyTestKey1234567890", "gemini-1.5-pro");
+        llmGateway.updateGeminiConfig("AIzaSyTestKey1234567890", "gemini-3.6-flash");
 
         try {
             PromptRequest req = new PromptRequest("Explain quantum computing");
@@ -487,12 +487,52 @@ class GatewayEvaluationTests {
             String activeModelName = llmGateway.getActiveModelName("openai", "gpt-4o");
             assertEquals("OpenAI (gpt-4o)", activeModelName);
 
-            String geminiModelName = llmGateway.getActiveModelName("gemini", "gemini-1.5-pro");
-            assertEquals("Google Gemini (gemini-1.5-pro)", geminiModelName);
+            String geminiModelName = llmGateway.getActiveModelName("gemini", "gemini-3.6-flash");
+            assertEquals("Google Gemini (gemini-3.6-flash)", geminiModelName);
         } finally {
             // Restore clean state
             llmGateway.updateOpenAiConfig("", "gpt-4o-mini");
-            llmGateway.updateGeminiConfig("", "gemini-1.5-flash");
+            llmGateway.updateGeminiConfig("", "gemini-3.6-flash");
         }
+    }
+
+    @Test
+    @DisplayName("Evaluation 7.6: Gemini Supported Model Selection and Status Verification")
+    void evaluateGeminiModelSelectionAndAvailability() {
+        var providers = gatewayController.getProviders();
+        assertNotNull(providers);
+        @SuppressWarnings("unchecked")
+        List<String> availableGemini = (List<String>) providers.get("availableGeminiModels");
+        assertNotNull(availableGemini);
+        assertTrue(availableGemini.contains("gemini-3.6-flash"));
+        assertTrue(availableGemini.contains("gemini-3.5-flash-lite"));
+        assertTrue(availableGemini.contains("gemini-3.8-flash"));
+        assertFalse(availableGemini.contains("gemini-2.0-flash"), "Obsolete gemini-2.0-flash must not be listed");
+    }
+
+    @Test
+    @DisplayName("Evaluation 7.7: Comprehensive HTTP Error Code Sanitization (400, 401, 403, 404, 429)")
+    void evaluateComprehensiveErrorCodeSanitization() {
+        // 400 Bad Request
+        String err400 = LlmGatewayService.sanitizeErrorMessage("400 Bad Request: Invalid model argument");
+        assertTrue(err400.contains("Bad Request (400)"));
+
+        // 401 Unauthorized
+        String err401 = LlmGatewayService.sanitizeErrorMessage("401 Unauthorized: key=AIzaSySecret123456");
+        assertTrue(err401.contains("Authentication Failure (401 Unauthorized)"));
+        assertFalse(err401.contains("AIzaSySecret123456"));
+
+        // 403 Forbidden
+        String err403 = LlmGatewayService.sanitizeErrorMessage("403 Forbidden: API key disabled or billing required");
+        assertTrue(err403.contains("Access Forbidden (403)"));
+
+        // 404 Not Found
+        String err404 = LlmGatewayService.sanitizeErrorMessage("404 Not Found: models/gemini-2.0-flash not found");
+        assertTrue(err404.contains("Model Not Found (404)"));
+        assertTrue(err404.contains("gemini-3.6-flash"));
+
+        // 429 Quota Exceeded
+        String err429 = LlmGatewayService.sanitizeErrorMessage("429 Too Many Requests: Quota exceeded");
+        assertTrue(err429.contains("Quota / Rate Limit Exceeded (429)"));
     }
 }

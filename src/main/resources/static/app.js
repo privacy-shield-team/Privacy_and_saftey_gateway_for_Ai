@@ -291,7 +291,7 @@ async function fetchProviderStatus() {
                 chatProvBadge.innerHTML = `<span>${ICONS.zap}</span> OPENAI (${escapeHtml(prov.openaiModel || 'gpt-4o-mini')})`;
             } else if (prov.activeProvider === 'gemini') {
                 chatProvBadge.className = 'badge badge-safe';
-                chatProvBadge.innerHTML = `<span>${ICONS.zap}</span> GEMINI (${escapeHtml(prov.geminiModel || 'gemini-1.5-flash')})`;
+                chatProvBadge.innerHTML = `<span>${ICONS.zap}</span> GEMINI (${escapeHtml(prov.geminiModel || 'gemini-3.6-flash')})`;
             } else {
                 chatProvBadge.className = 'badge badge-neutral';
                 chatProvBadge.innerHTML = `<span>${ICONS.shield}</span> MOCK ENGINE (OFFLINE)`;
@@ -400,7 +400,7 @@ async function testProviderConnection(provider, btn) {
         const res = await fetch('/api/providers/test', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ provider })
+            body: JSON.stringify({ provider: provider, model: (modelSelect ? modelSelect.value : null) })
         });
         const data = await res.json();
         if (data.success) {
@@ -632,9 +632,9 @@ function handleChatProviderChange(provider) {
     } else if (provider === 'gemini') {
         if (modelSelect) {
             modelSelect.innerHTML = `
-                <option value="gemini-1.5-flash">gemini-1.5-flash (Default)</option>
-                <option value="gemini-1.5-pro">gemini-1.5-pro</option>
-                <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                <option value="gemini-3.6-flash">gemini-3.6-flash (Recommended)</option>
+                <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
+                <option value="gemini-3.8-flash">gemini-3.8-flash</option>
             `;
         }
         if (provBadge) {
@@ -656,7 +656,7 @@ function handleChatProviderChange(provider) {
             modelSelect.innerHTML = `
                 <option value="auto">Auto Model Detection</option>
                 <option value="gpt-4o-mini">gpt-4o-mini</option>
-                <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+                <option value="gemini-3.6-flash">gemini-3.6-flash</option>
             `;
         }
         fetchProviderStatus();

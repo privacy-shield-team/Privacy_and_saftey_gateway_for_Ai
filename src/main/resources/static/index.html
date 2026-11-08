@@ -301,7 +301,7 @@
                                         <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
                                             <span style="display:flex; align-items:center; gap:8px;">
                                                 <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                                                <span>Google Gemini (1.5 Flash)</span>
+                                                <span>Google Gemini (3.6 Flash)</span>
                                             </span>
                                             <span class="badge badge-neutral" id="dashGeminiStatus">Checking...</span>
                                         </div>
@@ -359,8 +359,9 @@
                                     <select class="form-select" id="chatModelSelect" style="width: auto; padding: 5px 10px; font-size: 12px;">
                                         <option value="gpt-4o-mini">gpt-4o-mini</option>
                                         <option value="gpt-4o">gpt-4o</option>
-                                        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-                                        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+                                        <option value="gemini-3.6-flash">gemini-3.6-flash (Recommended)</option>
+                                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
+                                        <option value="gemini-3.8-flash">gemini-3.8-flash</option>
                                         <option value="mock-engine">Mock Engine (Safe Offline)</option>
                                     </select>
                                 </div>
@@ -827,9 +828,9 @@
                                 <div class="form-group">
                                     <label class="form-label">Model Selection</label>
                                     <select class="form-select" id="settingsGeminiModelSelect">
-                                        <option value="gemini-1.5-flash">gemini-1.5-flash (Recommended - Low Latency)</option>
-                                        <option value="gemini-1.5-pro">gemini-1.5-pro (Complex Reasoning)</option>
-                                        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+                                        <option value="gemini-3.6-flash">gemini-3.6-flash (Recommended - Low Latency &amp; Free Tier)</option>
+                                        <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Fast &amp; Cost Efficient)</option>
+                                        <option value="gemini-3.8-flash">gemini-3.8-flash (High Intelligence)</option>
                                     </select>
                                 </div>
                                 <div class="form-group">

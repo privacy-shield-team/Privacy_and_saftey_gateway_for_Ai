@@ -90,7 +90,8 @@ public class GatewayApiController {
     @PostMapping("/providers/test")
     public ResponseEntity<Map<String, Object>> testProviderConnection(@RequestBody(required = false) Map<String, String> body) {
         String provider = (body != null) ? body.get("provider") : "mock";
-        Map<String, Object> testResult = llmGateway.testProvider(provider);
+        String model = (body != null) ? body.get("model") : null;
+        Map<String, Object> testResult = llmGateway.testProvider(provider, model);
         return ResponseEntity.ok(testResult);
     }
 

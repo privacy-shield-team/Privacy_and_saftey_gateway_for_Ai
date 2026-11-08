@@ -36,8 +36,8 @@ public class LlmGatewayService {
     @Value("${ai.gateway.gemini.api-key:}")
     private String geminiApiKey;
 
-    @Value("${ai.gateway.gemini.model:gemini-1.5-flash}")
-    private String geminiModel;
+    @Value("${ai.gateway.gemini.model:gemini-3.6-flash}")
+    private String geminiModel = "gemini-3.6-flash";
 
     private final RestTemplate restTemplate;
 
@@ -189,40 +189,48 @@ public class LlmGatewayService {
     }
 
     public Map<String, Object> testProvider(String provider) {
+        return testProvider(provider, null);
+    }
+
+    public Map<String, Object> testProvider(String provider, String requestedModel) {
         String p = (provider == null) ? "mock" : provider.toLowerCase().trim();
         if ("openai".equals(p)) {
             if (!isOpenAiConfigured()) {
                 return Map.of("success", false, "provider", "openai", "error", "OpenAI API key is not configured.");
             }
+            String modelToTest = (requestedModel != null && !requestedModel.isBlank() && !"auto".equalsIgnoreCase(requestedModel))
+                    ? requestedModel.trim() : openAiModel;
             try {
                 String testPrompt = "Test ping from ProtectoShield AI Gateway. Respond with 'PONG'.";
-                String res = callOpenAi(testPrompt);
+                String res = callOpenAi(testPrompt, modelToTest);
                 return Map.of(
                         "success", true,
                         "provider", "openai",
-                        "model", openAiModel,
+                        "model", modelToTest,
                         "message", "OpenAI connection established successfully!",
                         "sample", res
                 );
             } catch (Exception e) {
-                return Map.of("success", false, "provider", "openai", "error", e.getMessage());
+                return Map.of("success", false, "provider", "openai", "model", modelToTest, "error", e.getMessage());
             }
         } else if ("gemini".equals(p)) {
             if (!isGeminiConfigured()) {
                 return Map.of("success", false, "provider", "gemini", "error", "Google Gemini API key is not configured.");
             }
+            String modelToTest = (requestedModel != null && !requestedModel.isBlank() && !"auto".equalsIgnoreCase(requestedModel))
+                    ? requestedModel.trim() : geminiModel;
             try {
                 String testPrompt = "Test ping from ProtectoShield AI Gateway. Respond with 'PONG'.";
-                String res = callGemini(testPrompt);
+                String res = callGemini(testPrompt, modelToTest);
                 return Map.of(
                         "success", true,
                         "provider", "gemini",
-                        "model", geminiModel,
+                        "model", modelToTest,
                         "message", "Google Gemini connection established successfully!",
                         "sample", res
                 );
             } catch (Exception e) {
-                return Map.of("success", false, "provider", "gemini", "error", e.getMessage());
+                return Map.of("success", false, "provider", "gemini", "model", modelToTest, "error", e.getMessage());
             }
         } else {
             return Map.of(
@@ -246,7 +254,7 @@ public class LlmGatewayService {
         status.put("geminiConfigured", isGeminiConfigured());
         status.put("geminiModel", geminiModel);
         status.put("geminiMaskedKey", getMaskedGeminiKey());
-        status.put("availableGeminiModels", List.of("gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"));
+        status.put("availableGeminiModels", List.of("gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"));
         status.put("mockFallbackActive", true);
         return status;
     }
@@ -395,11 +403,17 @@ public class LlmGatewayService {
         if (sanitized.contains("401")) {
             return "Authentication Failure (401 Unauthorized): The configured API key is invalid or expired. Check provider credentials in Settings.";
         }
+        if (sanitized.contains("403")) {
+            return "Access Forbidden (403): The API key lacks permission or the project/billing is not enabled for this service.";
+        }
+        if (sanitized.contains("400")) {
+            return "Bad Request (400): The prompt format, parameters, or model specification is invalid for this endpoint.";
+        }
         if (sanitized.contains("429")) {
             return "Quota / Rate Limit Exceeded (429): Provider rate limit or billing balance exceeded for this model.";
         }
         if (sanitized.contains("404")) {
-            return "Model Not Found (404): The requested model identifier is unavailable or deprecated.";
+            return "Model Not Found (404): The requested model identifier is unavailable or deprecated. Select a supported model like gemini-3.6-flash in Settings.";
         }
         if (sanitized.contains("ConnectException") || sanitized.contains("SocketTimeoutException") || sanitized.contains("ResourceAccessException")) {
             return "Connection Timeout: Unable to reach AI provider API within connection deadline.";
