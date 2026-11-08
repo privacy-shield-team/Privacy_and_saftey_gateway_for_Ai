@@ -1,5 +1,33 @@
-﻿/**
- * ProtectoShield â€” AI Privacy & Safety Gateway
+// --- Monochrome SVG Icon Registry ---
+const ICONS = {
+    shield: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    shieldCheck: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+    shieldAlert: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    dashboard: '<svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+    chat: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+    search: '<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    file: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    lock: '<svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    list: '<svg class="svg-icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+    settings: '<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    plus: '<svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    trash: '<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    send: '<svg class="svg-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+    stop: '<svg class="svg-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+    copy: '<svg class="svg-icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    refresh: '<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
+    alert: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    check: '<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    x: '<svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    bot: '<svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>',
+    user: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    sparkles: '<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+    zap: '<svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    chevronRight: '<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>'
+};
+
+/**
+ * ProtectoShield - AI Privacy & Safety Gateway
  * Enterprise Frontend Application Logic
  */
 
@@ -192,7 +220,7 @@ function renderDashboardRecentEvents(events) {
             <tr>
                 <td colspan="6">
                     <div class="empty-state" style="padding: 24px;">
-                        <div class="empty-state-icon">ðŸ›¡ï¸</div>
+                        <div class="empty-state-icon">${ICONS.shield}</div>
                         <div class="empty-state-title">No events recorded yet</div>
                         <div class="empty-state-text">Prompts evaluated by the gateway will appear here with zero raw secret retention.</div>
                     </div>
@@ -239,9 +267,9 @@ async function fetchActivePolicyDetails() {
         const listEl = document.getElementById('dashPolicyFeatureList');
         if (listEl) {
             listEl.innerHTML = `
-                <li><span>${policy.blockOnCredentials ? 'âœ“' : 'â—‹'}</span> Block on Credentials (${policy.blockOnCredentials ? 'ACTIVE' : 'OFF'})</li>
-                <li><span>${policy.blockOnInjection ? 'âœ“' : 'â—‹'}</span> Block on Prompt Injection (${policy.blockOnInjection ? 'ACTIVE' : 'OFF'})</li>
-                <li><span>${policy.strictMode ? 'âœ“' : 'â—‹'}</span> Strict PII Compliance Mode (${policy.strictMode ? 'ACTIVE' : 'OFF'})</li>
+                <li><span>${policy.blockOnCredentials ? 'ON' : 'OFF'}</span> Block on Credentials (${policy.blockOnCredentials ? 'ACTIVE' : 'OFF'})</li>
+                <li><span>${policy.blockOnInjection ? 'ON' : 'OFF'}</span> Block on Prompt Injection (${policy.blockOnInjection ? 'ACTIVE' : 'OFF'})</li>
+                <li><span>${policy.strictMode ? 'ON' : 'OFF'}</span> Strict PII Compliance Mode (${policy.strictMode ? 'ACTIVE' : 'OFF'})</li>
             `;
         }
     } catch (err) {
@@ -260,13 +288,13 @@ async function fetchProviderStatus() {
         if (chatProvBadge) {
             if (prov.activeProvider === 'openai') {
                 chatProvBadge.className = 'badge badge-safe';
-                chatProvBadge.innerHTML = `<span>âš¡</span> OPENAI (${escapeHtml(prov.openaiModel || 'gpt-4o-mini')})`;
+                chatProvBadge.innerHTML = `<span>${ICONS.zap}</span> OPENAI (${escapeHtml(prov.openaiModel || 'gpt-4o-mini')})`;
             } else if (prov.activeProvider === 'gemini') {
                 chatProvBadge.className = 'badge badge-safe';
-                chatProvBadge.innerHTML = `<span>âš¡</span> GEMINI (${escapeHtml(prov.geminiModel || 'gemini-1.5-flash')})`;
+                chatProvBadge.innerHTML = `<span>${ICONS.zap}</span> GEMINI (${escapeHtml(prov.geminiModel || 'gemini-1.5-flash')})`;
             } else {
                 chatProvBadge.className = 'badge badge-neutral';
-                chatProvBadge.innerHTML = `<span>ðŸ›¡ï¸</span> MOCK ENGINE (OFFLINE)`;
+                chatProvBadge.innerHTML = `<span>${ICONS.shield}</span> MOCK ENGINE (OFFLINE)`;
             }
         }
 
@@ -365,7 +393,7 @@ async function testProviderConnection(provider, btn) {
     const isAi = provider === 'openai';
     const resultSpan = document.getElementById(isAi ? 'settingsOpenAiTestResult' : 'settingsGeminiTestResult');
     const originalText = btn ? btn.innerHTML : '';
-    if (btn) btn.innerHTML = '<span>â³</span> Testing...';
+    if (btn) btn.innerHTML = '<span>${ICONS.refresh}</span> Testing...';
     if (resultSpan) resultSpan.innerHTML = '<span style="color:var(--text-muted);">Pinging API endpoint...</span>';
 
     try {
@@ -377,19 +405,19 @@ async function testProviderConnection(provider, btn) {
         const data = await res.json();
         if (data.success) {
             if (resultSpan) {
-                resultSpan.innerHTML = `<span style="color:var(--state-safe); font-weight:600;">âœ“ Connected: ${escapeHtml(data.message || 'OK')}</span>`;
+                resultSpan.innerHTML = `<span style="color:var(--state-safe); font-weight:600;">Connected: ${escapeHtml(data.message || 'OK')}</span>`;
             }
             showToast(`${provider.toUpperCase()} connection verified!`, 'success');
             await fetchProviderStatus();
         } else {
             if (resultSpan) {
-                resultSpan.innerHTML = `<span style="color:var(--state-danger); font-weight:600;">âœ— Failed: ${escapeHtml(data.error || 'Connection failed')}</span>`;
+                resultSpan.innerHTML = `<span style="color:var(--state-danger); font-weight:600;">Failed: ${escapeHtml(data.error || 'Connection failed')}</span>`;
             }
             showToast(`Connection failed: ${data.error}`, 'warning');
         }
     } catch (err) {
         if (resultSpan) {
-            resultSpan.innerHTML = `<span style="color:var(--state-danger);">âœ— Error: ${escapeHtml(err.message)}</span>`;
+            resultSpan.innerHTML = `<span style="color:var(--state-danger);">Error: ${escapeHtml(err.message)}</span>`;
         }
         showToast('Test request failed: ' + err.message, 'danger');
     } finally {
@@ -458,7 +486,7 @@ function startNewChatSession() {
 
     container.innerHTML = `
         <div class="chat-welcome-container" id="chatWelcomeCard">
-            <div class="chat-welcome-icon">ðŸ›¡ï¸</div>
+            <div class="chat-welcome-icon">${ICONS.shield}</div>
             <div class="chat-welcome-title">ProtectoShield Protected Assistant</div>
             <div class="chat-welcome-desc">
                 Every message is inspected, sanitized, and tokenized before transmission to the AI model. 
@@ -556,7 +584,7 @@ function runPreflightInputAnalysis(text) {
         banner.style.backgroundColor = 'rgba(239, 68, 68, 0.12)';
         banner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
         banner.style.color = 'var(--state-danger)';
-        msg.textContent = 'ðŸš¨ Prompt Injection Pattern Detected: This message will be evaluated and blocked by gateway guardrails.';
+        msg.textContent = 'Prompt Injection Pattern Detected: This message will be evaluated and blocked by gateway guardrails.';
         badge.className = 'badge badge-critical';
         badge.textContent = 'ATTACK PATTERN';
     } else if (hasApiKey || hasPassword) {
@@ -564,7 +592,7 @@ function runPreflightInputAnalysis(text) {
         banner.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
         banner.style.borderColor = 'rgba(239, 68, 68, 0.25)';
         banner.style.color = 'var(--state-danger)';
-        msg.textContent = 'ðŸ”’ High-Risk Secret / Credential Detected: Gateway will intercept to prevent token leakage.';
+        msg.textContent = 'High-Risk Secret / Credential Detected: Gateway will intercept to prevent token leakage.';
         badge.className = 'badge badge-danger';
         badge.textContent = 'CREDENTIAL';
     } else if (hasCard || hasEmail) {
@@ -572,7 +600,7 @@ function runPreflightInputAnalysis(text) {
         banner.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
         banner.style.borderColor = 'rgba(245, 158, 11, 0.25)';
         banner.style.color = 'var(--state-warning)';
-        msg.textContent = 'ðŸ›¡ï¸ PII Detected (Financial / Contact): Gateway will sanitize or mask entities before forwarding.';
+        msg.textContent = '${ICONS.shield} PII Detected (Financial / Contact): Gateway will sanitize or mask entities before forwarding.';
         badge.className = 'badge badge-warning';
         badge.textContent = 'PII IDENTIFIED';
     } else {
@@ -599,7 +627,7 @@ function handleChatProviderChange(provider) {
         }
         if (provBadge) {
             provBadge.className = 'badge badge-safe';
-            provBadge.innerHTML = '<span>âš¡</span> OPENAI (DIRECT)';
+            provBadge.innerHTML = '<span>' + ICONS.zap + '</span> OPENAI (DIRECT)';
         }
     } else if (provider === 'gemini') {
         if (modelSelect) {
@@ -611,7 +639,7 @@ function handleChatProviderChange(provider) {
         }
         if (provBadge) {
             provBadge.className = 'badge badge-safe';
-            provBadge.innerHTML = '<span>âš¡</span> GEMINI (DIRECT)';
+            provBadge.innerHTML = '<span>' + ICONS.zap + '</span> GEMINI (DIRECT)';
         }
     } else if (provider === 'mock') {
         if (modelSelect) {
@@ -621,7 +649,7 @@ function handleChatProviderChange(provider) {
         }
         if (provBadge) {
             provBadge.className = 'badge badge-neutral';
-            provBadge.innerHTML = '<span>ðŸ›¡ï¸</span> MOCK ENGINE (OFFLINE)';
+            provBadge.innerHTML = '<span>${ICONS.shield}</span> MOCK ENGINE (OFFLINE)';
         }
     } else {
         if (modelSelect) {
@@ -707,7 +735,7 @@ async function sendProtectedChatMessage() {
             state.chatHistory.push({ role: 'user', content: sanitizedUserContent });
             state.chatHistory.push({ role: 'assistant', content: data.modelAnswer || '' });
 
-            // Keep history manageable â€” last 20 turns (10 exchanges)
+            // Keep history manageable - last 20 turns (10 exchanges)
             if (state.chatHistory.length > 20) {
                 state.chatHistory = state.chatHistory.slice(-20);
             }
@@ -756,8 +784,8 @@ function appendUserChatBubble(text) {
     wrap.innerHTML = `
         <div class="chat-bubble">${escapeHtml(text)}</div>
         <div class="chat-security-meta" style="justify-content: flex-end;">
-            <span>ðŸ›¡ï¸ Intercepted by Shield</span>
-            <span>â€¢</span>
+            <span>${ICONS.shield} Intercepted by Shield</span>
+            <span>&bull;</span>
             <span>${timeStr}</span>
         </div>
     `;
@@ -821,8 +849,8 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
         providerStatusBadgeHtml = `
             <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 12px; color: var(--state-warning); display: flex; align-items: center; justify-content: space-between; gap: 8px;">
                 <span style="display:flex; align-items:center; gap:6px;">
-                    <span>âš ï¸</span>
-                    <span><strong>Mock Mode Active</strong> â€” Simulated response. No live AI provider configured.</span>
+                    <span>${ICONS.alert}</span>
+                    <span><strong>Mock Mode Active</strong> - Simulated response. No live AI provider configured.</span>
                 </span>
                 <button class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size:11px;" onclick="navigateTo('settings')">Configure Key</button>
             </div>
@@ -830,8 +858,8 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
     } else {
         providerStatusBadgeHtml = `
             <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 6px 12px; margin-bottom: 8px; font-size: 12px; color: var(--state-safe); display: flex; align-items: center; gap: 6px;">
-                <span>âš¡</span>
-                <span><strong>Live AI Response</strong> â€” Secured and routed through ProtectoShield Gateway.</span>
+                <span>${ICONS.zap}</span>
+                <span><strong>Live AI Response</strong> - Secured and routed through ProtectoShield Gateway.</span>
             </div>
         `;
     }
@@ -839,11 +867,11 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
     // Action status badge
     let statusPillHtml = '';
     if (action === 'SANITIZED') {
-        statusPillHtml = `<span class="badge badge-warning">ðŸ›¡ï¸ SANITIZED (${detectionsCount} PII scrubbed)</span>`;
+        statusPillHtml = `<span class="badge badge-warning">${ICONS.shield} SANITIZED (${detectionsCount} PII scrubbed)</span>`;
     } else if (action === 'OVERRIDDEN') {
-        statusPillHtml = `<span class="badge badge-blue">âš ï¸ USER OVERRIDDEN</span>`;
+        statusPillHtml = `<span class="badge badge-blue">${ICONS.alert} USER OVERRIDDEN</span>`;
     } else {
-        statusPillHtml = `<span class="badge badge-safe">âœ“ CLEAN PASS</span>`;
+        statusPillHtml = `<span class="badge badge-safe">${ICONS.check} CLEAN PASS</span>`;
     }
 
     // Findings Table HTML
@@ -885,7 +913,7 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
         restorationHtml = `
             <div class="inspector-restoration-box">
                 <div style="font-size:11.5px; font-weight:700; color:var(--brand-blue); margin-bottom:4px;">
-                    ðŸ”„ Reversible De-tokenization Applied on Response:
+                    ${ICONS.refresh} Reversible De-tokenization Applied on Response:
                 </div>
                 <div style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">
                     The model received and generated answers containing synthetic tokens. ProtectoShield restored original values on the client edge:
@@ -901,7 +929,7 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
     } else {
         restorationHtml = `
             <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
-                <span>âœ“ Zero token de-anonymization needed: AI response delivered transparently to user.</span>
+                <span>${ICONS.check} Zero token de-anonymization needed: AI response delivered transparently to user.</span>
             </div>
         `;
     }
@@ -914,16 +942,16 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
 
         <div class="chat-actions-row">
             <button class="chat-action-btn" onclick="copyMessageText('body-${msgId}', this)">
-                <span>ðŸ“‹</span> Copy
+                ${ICONS.copy} Copy
             </button>
             <button class="chat-action-btn" onclick="regenerateMessage('${escapeHtml(userPrompt)}')">
-                <span>ðŸ”„</span> Regenerate
+                ${ICONS.refresh} Regenerate
             </button>
             <button class="chat-action-btn" id="btn-toggle-${drawerId}" onclick="toggleSecurityDetails('${drawerId}', this)">
-                <span>ðŸ›¡ï¸</span> Privacy Inspector
+                ${ICONS.shield} Privacy Inspector
             </button>
             <span style="font-size:11.5px; color:var(--text-muted); margin-left:auto;">
-                ðŸ¤– ${escapeHtml(providerUsed)}${isMockMode ? ' (Mock)' : ''}
+                ${ICONS.bot} ${escapeHtml(providerUsed)}${isMockMode ? ' (Mock)' : ''}
             </span>
         </div>
 
@@ -931,7 +959,7 @@ function renderSuccessfulAssistantMessage(msgId, data, userPrompt) {
         <div class="privacy-inspector-drawer" id="${drawerId}">
             <div class="inspector-header-bar">
                 <div class="inspector-title">
-                    <span>ðŸ›¡ï¸</span> Privacy Firewall Inspector
+                    <span>${ICONS.shield}</span> Privacy Firewall Inspector
                 </div>
                 <div class="inspector-meta-chips">
                     ${statusPillHtml}
@@ -1017,7 +1045,7 @@ function renderBlockedAssistantMessage(msgId, data, userPrompt) {
     wrap.innerHTML = `
         <div class="chat-bubble" style="border: 1px solid var(--state-danger); background: rgba(239, 68, 68, 0.08);">
             <div style="display:flex; align-items:center; gap:8px; color:var(--state-danger); font-weight:700; margin-bottom:6px;">
-                <span>ðŸš«</span> PROMPT BLOCKED BY PRIVACY GATEWAY
+                <span>${ICONS.shieldAlert}</span> PROMPT BLOCKED BY PRIVACY GATEWAY
             </div>
             <div style="color:var(--text-secondary); line-height:1.5;">
                 ${escapeHtml(reason)}
@@ -1029,10 +1057,10 @@ function renderBlockedAssistantMessage(msgId, data, userPrompt) {
 
         <div class="chat-actions-row">
             <button class="chat-action-btn" id="btn-toggle-${drawerId}" onclick="toggleSecurityDetails('${drawerId}', this)">
-                <span>ðŸ›¡ï¸</span> Threat Breakdown &amp; Inspector
+                ${ICONS.shield} Threat Breakdown &amp; Inspector
             </button>
             <button class="chat-action-btn" onclick="regenerateMessage('${escapeHtml(userPrompt)}')">
-                <span>ðŸ”„</span> Retry
+                <span>${ICONS.refresh}</span> Retry
             </button>
         </div>
 
@@ -1040,7 +1068,7 @@ function renderBlockedAssistantMessage(msgId, data, userPrompt) {
         <div class="privacy-inspector-drawer" id="${drawerId}">
             <div class="inspector-header-bar">
                 <div class="inspector-title" style="color:var(--state-danger);">
-                    <span>ðŸš¨</span> Threat Mitigation Report
+                    <span>${ICONS.alert}</span> Threat Mitigation Report
                 </div>
                 <div class="inspector-meta-chips">
                     <span class="badge badge-danger">BLOCKED BEFORE AI CALL</span>
@@ -1118,7 +1146,7 @@ function renderAbortedAssistantMessage(msgId, userPrompt) {
         </div>
         <div class="chat-actions-row">
             <button class="chat-action-btn" onclick="regenerateMessage('${escapeHtml(userPrompt)}')">
-                <span>ðŸ”„</span> Retry
+                <span>${ICONS.refresh}</span> Retry
             </button>
         </div>
     `;
@@ -1168,7 +1196,7 @@ function copyMessageText(elementId, btn) {
         navigator.clipboard.writeText(text).then(() => {
             if (btn) {
                 const orig = btn.innerHTML;
-                btn.innerHTML = '<span>âœ“</span> Copied!';
+                btn.innerHTML = '<span>' + ICONS.check + '</span> Copied!';
                 setTimeout(() => { btn.innerHTML = orig; }, 1500);
             }
             showToast('Message copied to clipboard', 'success');
@@ -1192,7 +1220,7 @@ function fallbackCopy(text, btn) {
         document.body.removeChild(ta);
         if (btn) {
             const orig = btn.innerHTML;
-            btn.innerHTML = '<span>âœ“</span> Copied!';
+            btn.innerHTML = '<span>' + ICONS.check + '</span> Copied!';
             setTimeout(() => { btn.innerHTML = orig; }, 1500);
         }
         showToast('Message copied to clipboard', 'success');
@@ -1365,7 +1393,7 @@ async function runPromptScan() {
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align:center; color:var(--state-safe); padding:18px;">
-                            âœ“ Clean prompt â€” No sensitive PII entities, credentials, or keys detected.
+                            Clean prompt - No sensitive PII entities, credentials, or keys detected.
                         </td>
                     </tr>
                 `;
@@ -1461,7 +1489,7 @@ async function submitGatewayPrompt() {
 
         if (data.blocked) {
             if (promptView) promptView.textContent = `[BLOCKED BY GATEWAY]\nReason: ${data.blockReason}`;
-            if (answerView) answerView.textContent = '[AI SERVICE WAS NOT INVOKED â€” ZERO DATA LEAKAGE]';
+            if (answerView) answerView.textContent = '[AI SERVICE WAS NOT INVOKED - ZERO DATA LEAKAGE]';
             showToast('Prompt blocked by security policy!', 'danger');
         } else {
             if (promptView) promptView.textContent = data.protectedPrompt || data.originalPrompt;
@@ -1582,13 +1610,13 @@ async function loadAllPolicies() {
                             ${escapeHtml(getPolicyDescription(name))}
                         </div>
                         <ul class="policy-feature-list" style="margin-bottom:16px;">
-                            <li><span>â€¢</span> Strategy: <strong>${escapeHtml(p.strategy || 'REDACT')}</strong></li>
-                            <li><span>â€¢</span> Block on Secrets: <strong>${p.blockOnCredentials ? 'YES' : 'NO'}</strong></li>
-                            <li><span>â€¢</span> Block on Injections: <strong>${p.blockOnInjection ? 'YES' : 'NO'}</strong></li>
-                            <li><span>â€¢</span> Strict Mode: <strong>${p.strictMode ? 'YES' : 'NO'}</strong></li>
+                            <li><span>&bull;</span> Strategy: <strong>${escapeHtml(p.strategy || 'REDACT')}</strong></li>
+                            <li><span>&bull;</span> Block on Secrets: <strong>${p.blockOnCredentials ? 'YES' : 'NO'}</strong></li>
+                            <li><span>&bull;</span> Block on Injections: <strong>${p.blockOnInjection ? 'YES' : 'NO'}</strong></li>
+                            <li><span>&bull;</span> Strict Mode: <strong>${p.strictMode ? 'YES' : 'NO'}</strong></li>
                         </ul>
                         <button class="btn ${isActive ? 'btn-secondary' : 'btn-primary'} btn-sm" style="width:100%;" onclick="changePolicyPreset('${escapeHtml(name)}')">
-                            ${isActive ? 'âœ“ Currently Enforced' : 'Enforce Policy'}
+                            ${isActive ? 'Currently Enforced' : 'Enforce Policy'}
                         </button>
                     </div>
                 </div>
@@ -1635,7 +1663,7 @@ function renderFullAuditTable(logs) {
             <tr>
                 <td colspan="8">
                     <div class="empty-state">
-                        <div class="empty-state-icon">ðŸ“‹</div>
+                        <div class="empty-state-icon">${ICONS.list}</div>
                         <div class="empty-state-title">No audit records found</div>
                         <div class="empty-state-text">As prompts pass through the gateway, zero-secret audit events are recorded here.</div>
                     </div>
@@ -1737,7 +1765,7 @@ function formatAiResponse(text) {
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
     // Format bullet points
-    html = html.replace(/(?:^|\n)[*-]\s+(.+)/g, '<div style="display:flex; gap:6px; margin:2px 0 2px 10px;"><span>â€¢</span><span>$1</span></div>');
+    html = html.replace(/(?:^|\n)[*-]\s+(.+)/g, '<div style="display:flex; gap:6px; margin:2px 0 2px 10px;"><span>&bull;</span><span>$1</span></div>');
 
     // Convert newlines to breaks
     html = html.replace(/\n/g, '<br>');
@@ -1796,7 +1824,7 @@ async function checkAuthSession() {
     try {
         const res = await fetch('/auth/me');
         if (!res.ok) {
-            // Not authenticated â€” redirect to login
+            // Not authenticated - redirect to login
             window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
             return null;
         }
@@ -1804,7 +1832,7 @@ async function checkAuthSession() {
         displayUserInSidebar(user);
         return user;
     } catch (err) {
-        // Server unreachable â€” still show app but mark offline
+        // Server unreachable - still show app but mark offline
         console.warn('Auth check failed:', err.message);
         return null;
     }
@@ -1832,7 +1860,7 @@ function displayUserInSidebar(user) {
 
 async function handleLogout() {
     const btn = document.getElementById('sidebarLogoutBtn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Signing outâ€¦'; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing out...'; }
 
     try {
         await fetch('/auth/logout', { method: 'POST' });
@@ -1865,7 +1893,7 @@ async function fetchGoogleOAuthConfig() {
                 badge.textContent = 'Active (Configured)';
             }
             if (status) {
-                status.innerHTML = '<span style=\"color:var(--state-safe);\">âœ“ Configured: ' + (cfg.googleClientIdMasked || 'Active') + '</span>';
+                status.innerHTML = '<span style=\"color:var(--state-safe);\"> Configured: ' + (cfg.googleClientIdMasked || 'Active') + '</span>';
             }
         } else {
             if (badge) {

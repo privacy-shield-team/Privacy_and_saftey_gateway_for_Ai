@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — ProtectoShield</title>
+    <title>Sign In &mdash; ProtectoShield</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@
             flex-direction: column;
         }
 
-        /* ─── Brand Header ─── */
+        /* --- Brand Header --- */
         .brand-header {
             text-align: center;
             margin-bottom: 28px;
@@ -109,7 +109,7 @@
             line-height: 1.5;
         }
 
-        /* ─── Card ─── */
+        /* --- Card --- */
         .auth-card {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -118,7 +118,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 24px rgba(0,0,0,0.05);
         }
 
-        /* ─── Tabs ─── */
+        /* --- Tabs --- */
         .tab-row {
             display: flex;
             gap: 0;
@@ -149,7 +149,7 @@
             font-weight: 600;
         }
 
-        /* ─── Forms ─── */
+        /* --- Forms --- */
         .form-panel { display: none; }
         .form-panel.active { display: block; }
 
@@ -236,7 +236,7 @@
 
         .forgot-link:hover { color: var(--text); text-decoration: underline; }
 
-        /* ─── Buttons ─── */
+        /* --- Buttons --- */
         .btn-primary {
             width: 100%;
             padding: 10px 16px;
@@ -286,7 +286,7 @@
             flex-shrink: 0;
         }
 
-        /* ─── Divider ─── */
+        /* --- Divider --- */
         .divider {
             display: flex;
             align-items: center;
@@ -307,7 +307,7 @@
             white-space: nowrap;
         }
 
-        /* ─── CAPTCHA Container ─── */
+        /* --- CAPTCHA Container --- */
         .captcha-box-container {
             margin-bottom: 16px;
             display: flex;
@@ -352,7 +352,7 @@
             gap: 4px;
         }
 
-        /* ─── Alerts ─── */
+        /* --- Alerts --- */
         .alert {
             padding: 10px 13px;
             border-radius: var(--radius-sm);
@@ -396,7 +396,7 @@
         .auth-footer a { color: var(--text-secondary); text-decoration: none; }
         .auth-footer a:hover { text-decoration: underline; }
 
-        /* ─── Google Setup Modal ─── */
+        /* --- Google Setup Modal --- */
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -538,7 +538,9 @@
     <!-- Brand Header -->
     <div class="brand-header">
         <div class="brand-logo">
-            <div class="brand-logo-icon">🛡️</div>
+            <div class="brand-logo-icon">
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#FFFFFF;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
             <div>
                 <div class="brand-logo-text">Protecto<span>Shield</span></div>
                 <div class="brand-tagline">AI Privacy Gateway</div>
@@ -559,15 +561,15 @@
 
         <!-- Error / Success Alert -->
         <div class="alert alert-error" id="alertError" role="alert">
-            <span>⚠️</span>
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             <span id="alertErrorText">Invalid credentials.</span>
         </div>
         <div class="alert alert-success" id="alertSuccess" role="alert">
-            <span>✓</span>
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
             <span id="alertSuccessText">Success!</span>
         </div>
 
-        <!-- ─── SIGN IN PANEL ─── -->
+        <!-- --- SIGN IN PANEL --- -->
         <div class="form-panel active" id="panelSignIn">
 
             <!-- Google OAuth Button -->
@@ -601,7 +603,7 @@
                         <input type="password" class="form-input has-toggle" id="siPassword"
                                placeholder="Enter your password" autocomplete="current-password" required>
                         <button type="button" class="input-toggle-btn" onclick="togglePassword('siPassword', this)"
-                                aria-label="Toggle password visibility">👁</button>
+                                aria-label="Toggle password visibility"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     </div>
                 </div>
 
@@ -620,7 +622,7 @@
                             <input type="checkbox" id="chkFallbackSignIn" onchange="onFallbackCheck('signIn', this)">
                             <span>Verify you are human</span>
                         </label>
-                        <div class="fallback-badge">🛡️ Security</div>
+                        <div class="fallback-badge"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security</div>
                     </div>
                 </div>
 
@@ -631,7 +633,7 @@
             </form>
         </div>
 
-        <!-- ─── REGISTER PANEL ─── -->
+        <!-- --- REGISTER PANEL --- -->
         <div class="form-panel" id="panelRegister">
 
             <form id="formRegister" onsubmit="handleRegister(event)" novalidate>
@@ -653,7 +655,7 @@
                         <input type="password" class="form-input has-toggle" id="regPassword"
                                placeholder="At least 8 characters" autocomplete="new-password" required>
                         <button type="button" class="input-toggle-btn" onclick="togglePassword('regPassword', this)"
-                                aria-label="Toggle password visibility">👁</button>
+                                aria-label="Toggle password visibility"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     </div>
                 </div>
 
@@ -663,7 +665,7 @@
                         <input type="password" class="form-input has-toggle" id="regConfirmPassword"
                                placeholder="Repeat your password" autocomplete="new-password" required>
                         <button type="button" class="input-toggle-btn" onclick="togglePassword('regConfirmPassword', this)"
-                                aria-label="Toggle password visibility">👁</button>
+                                aria-label="Toggle password visibility"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     </div>
                 </div>
 
@@ -674,7 +676,7 @@
                             <input type="checkbox" id="chkFallbackRegister" onchange="onFallbackCheck('register', this)">
                             <span>Verify you are human</span>
                         </label>
-                        <div class="fallback-badge">🛡️ Security</div>
+                        <div class="fallback-badge"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security</div>
                     </div>
                 </div>
 
@@ -687,20 +689,20 @@
     </div>
 
     <div class="auth-footer">
-        Protected by ProtectoShield &nbsp;·&nbsp;
+        Protected by ProtectoShield &nbsp;&bull;&nbsp;
         <a href="https://github.com/privacy-shield-team/Privacy_and_saftey_gateway_for_Ai" target="_blank" rel="noopener">GitHub</a>
     </div>
 </div>
 
-<!-- ─── Google OAuth Configuration Modal ─── -->
+<!-- --- Google OAuth Configuration Modal --- -->
 <div class="modal-backdrop" id="googleSetupModal">
     <div class="modal-card">
         <div class="modal-header">
             <div class="modal-title">
-                <span>🔐</span>
+                <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;"><path d="M21 2l-2 2m-1.5 1.5L16 7l-2-2-1.5 1.5 2 2L13 10l-1.5-1.5-2 2 1.5 1.5L9.5 13.5A6.5 6.5 0 1 1 3 7a6.5 6.5 0 0 1 10.5 4.5l6-6z"/></svg>
                 <span>Connect Google Authentication</span>
             </div>
-            <button class="modal-close-btn" onclick="closeGoogleModal()">×</button>
+            <button class="modal-close-btn" onclick="closeGoogleModal()">&times;</button>
         </div>
         <div class="modal-body">
             <p>To enable genuine Google OAuth sign-in on this ProtectoShield instance:</p>
@@ -743,7 +745,7 @@
 </div>
 
 <script>
-// ─── State ───────────────────────────────────────────────────────────────
+// --- State ---------------------------------------------------------------
 let authConfig = {
     captchaConfigured: true,
     captchaSiteKey: '1x00000000000000000000AA',
@@ -755,7 +757,7 @@ let captchaTokenRegister = null;
 let turnstileRenderedSignIn = false;
 let turnstileRenderedRegister = false;
 
-// ─── Boot ─────────────────────────────────────────────────────────────────
+// --- Boot -----------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     // Check if already authenticated
     try {
@@ -797,7 +799,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     initTurnstile();
 });
 
-// ─── Turnstile CAPTCHA Integration ─────────────────────────────────────────
+// --- Turnstile CAPTCHA Integration -----------------------------------------
 function initTurnstile() {
     let attempts = 0;
     const interval = setInterval(() => {
@@ -807,7 +809,7 @@ function initTurnstile() {
             renderTurnstileWidget('signIn');
         } else if (attempts > 20) {
             clearInterval(interval);
-            // Cloudflare script blocked or unavailable — fallback checkbox is already visible
+            // Cloudflare script blocked or unavailable ... fallback checkbox is already visible
             console.log('Turnstile loaded fallback mode');
         }
     }, 150);
@@ -868,7 +870,7 @@ function buildFallbackHtml(form) {
                 <input type="checkbox" onchange="onFallbackCheck('${form}', this)">
                 <span>Verify you are human</span>
             </label>
-            <div class="fallback-badge">🛡️ Security Check</div>
+            <div class="fallback-badge"><svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security Check</div>
         </div>
     `;
 }
@@ -883,7 +885,7 @@ function onFallbackCheck(form, checkbox) {
     }
 }
 
-// ─── Tabs ──────────────────────────────────────────────────────────────────
+// --- Tabs ------------------------------------------------------------------
 function switchTab(tab) {
     hideAlert();
     document.getElementById('panelSignIn').classList.toggle('active', tab === 'signin');
@@ -902,19 +904,18 @@ function switchTab(tab) {
     }
 }
 
-// ─── Password Toggle ───────────────────────────────────────────────────────
+// --- Password Toggle -------------------------------------------------------
 function togglePassword(inputId, btn) {
     const input = document.getElementById(inputId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-    } else {
-        input.type = 'password';
-        btn.textContent = '👁';
-    }
+    if (!input) return;
+    const isPw = input.type === 'password';
+    input.type = isPw ? 'text' : 'password';
+    btn.innerHTML = isPw
+        ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
 }
 
-// ─── Sign In ───────────────────────────────────────────────────────────────
+// --- Sign In ---------------------------------------------------------------
 async function handleSignIn(e) {
     e.preventDefault();
     hideAlert();
@@ -950,7 +951,7 @@ async function handleSignIn(e) {
         const data = await res.json();
 
         if (res.ok) {
-            showAlert('success', `Welcome back${data.name ? ', ' + data.name : ''}! Redirecting…`);
+            showAlert('success', `Welcome back${data.name ? ', ' + data.name : ''}! Redirecting...`);
             setTimeout(() => { window.location.href = '/'; }, 800);
         } else {
             showAlert('error', data.error || 'Invalid credentials. Please try again.');
@@ -962,7 +963,7 @@ async function handleSignIn(e) {
     setLoading('signIn', false);
 }
 
-// ─── Register ──────────────────────────────────────────────────────────────
+// --- Register --------------------------------------------------------------
 async function handleRegister(e) {
     e.preventDefault();
     hideAlert();
@@ -1010,7 +1011,7 @@ async function handleRegister(e) {
         const data = await res.json();
 
         if (res.ok) {
-            showAlert('success', 'Account created! Redirecting to your dashboard…');
+            showAlert('success', 'Account created! Redirecting to your dashboard...');
             setTimeout(() => { window.location.href = '/'; }, 1000);
         } else {
             showAlert('error', data.error || 'Registration failed. Please try again.');
@@ -1022,23 +1023,23 @@ async function handleRegister(e) {
     setLoading('register', false);
 }
 
-// ─── Google OAuth Flow ─────────────────────────────────────────────────────
+// --- Google OAuth Flow -----------------------------------------------------
 async function handleGoogleButtonClick() {
     hideAlert();
 
     document.getElementById('googleSpinner').style.display = 'block';
-    document.getElementById('btnGoogleText').textContent = 'Connecting…';
+    document.getElementById('btnGoogleText').textContent = 'Connecting...';
 
     try {
         const res = await fetch('/auth/oauth2/google');
         const data = await res.json();
 
         if (res.ok && data.configured && data.redirectUrl) {
-            // Already configured — redirect to Google!
+            // Already configured ... redirect to Google!
             window.location.href = data.redirectUrl;
             return;
         } else {
-            // Not configured — open setup modal
+            // Not configured ... open setup modal
             openGoogleModal(data.redirectUri || authConfig.googleRedirectUri);
         }
     } catch (err) {
@@ -1107,13 +1108,13 @@ async function saveAndLaunchGoogleOAuth() {
     }
 }
 
-// ─── Forgot Password ───────────────────────────────────────────────────────
+// --- Forgot Password -------------------------------------------------------
 function showForgotPassword(e) {
     e.preventDefault();
     showAlert('warning', 'Password reset: Please contact your administrator or create a new account.');
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+// --- Helpers ---------------------------------------------------------------
 function showAlert(type, msg) {
     hideAlert();
     if (type === 'error') {
@@ -1142,14 +1143,14 @@ function setLoading(form, loading) {
         const text = document.getElementById('btnSignInText');
         btn.disabled = loading;
         spinner.style.display = loading ? 'block' : 'none';
-        text.textContent = loading ? 'Signing in…' : 'Sign In';
+        text.textContent = loading ? 'Signing in...' : 'Sign In';
     } else {
         const btn = document.getElementById('btnRegister');
         const spinner = document.getElementById('registerSpinner');
         const text = document.getElementById('btnRegisterText');
         btn.disabled = loading;
         spinner.style.display = loading ? 'block' : 'none';
-        text.textContent = loading ? 'Creating account…' : 'Create Account';
+        text.textContent = loading ? 'Creating account...' : 'Create Account';
     }
 }
 </script>
