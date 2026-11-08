@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProtectoShield — AI Privacy & Safety Gateway</title>
+    <title>ProtectoShield â€” AI Privacy & Safety Gateway</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
         <!-- Sidebar Navigation -->
         <aside class="app-sidebar" id="appSidebar">
             <div class="sidebar-header">
-                <div class="brand-shield-icon">🛡️</div>
+                <div class="brand-shield-icon">ðŸ›¡ï¸</div>
                 <div class="brand-text-wrap">
                     <div class="brand-name">Protecto<span>Shield</span></div>
                     <div class="brand-caption">AI Privacy Gateway</div>
@@ -21,34 +21,34 @@
             <nav class="sidebar-nav">
                 <div class="nav-section-title">Operations</div>
                 <a class="nav-link active" data-section="dashboard" onclick="navigateTo('dashboard')">
-                    <span class="nav-icon">📊</span>
+                    <span class="nav-icon">ðŸ“Š</span>
                     <span>Dashboard</span>
                 </a>
                 <a class="nav-link" data-section="chat" onclick="navigateTo('chat')">
-                    <span class="nav-icon">💬</span>
+                    <span class="nav-icon">ðŸ’¬</span>
                     <span>Protected AI Chat</span>
                     <span class="nav-badge-pill" id="sidebarChatBadge">Live</span>
                 </a>
                 <a class="nav-link" data-section="prompt-protection" onclick="navigateTo('prompt-protection')">
-                    <span class="nav-icon">🛡️</span>
+                    <span class="nav-icon">ðŸ›¡ï¸</span>
                     <span>Prompt Scanner</span>
                 </a>
                 <a class="nav-link" data-section="doc-scanner" onclick="navigateTo('doc-scanner')">
-                    <span class="nav-icon">📄</span>
+                    <span class="nav-icon">ðŸ“„</span>
                     <span>Document &amp; Text Scanner</span>
                 </a>
 
                 <div class="nav-section-title" style="margin-top: 8px;">Governance</div>
                 <a class="nav-link" data-section="policies" onclick="navigateTo('policies')">
-                    <span class="nav-icon">🔒</span>
+                    <span class="nav-icon">ðŸ”’</span>
                     <span>Security Policies</span>
                 </a>
                 <a class="nav-link" data-section="audit-logs" onclick="navigateTo('audit-logs')">
-                    <span class="nav-icon">📋</span>
+                    <span class="nav-icon">ðŸ“‹</span>
                     <span>Audit Logs</span>
                 </a>
                 <a class="nav-link" data-section="settings" onclick="navigateTo('settings')">
-                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-icon">âš™ï¸</span>
                     <span>Settings</span>
                 </a>
             </nav>
@@ -72,21 +72,21 @@
             <!-- App Header -->
             <header class="app-header">
                 <div class="header-left">
-                    <button class="mobile-menu-btn" onclick="toggleSidebar(true)" aria-label="Open Navigation">☰</button>
+                    <button class="mobile-menu-btn" onclick="toggleSidebar(true)" aria-label="Open Navigation">â˜°</button>
                     <h1 class="header-section-title" id="headerTitle">Dashboard</h1>
                 </div>
 
                 <div class="header-right">
                     <div class="header-chip chip-safe primary-chip" id="headerGatewayPill">
-                        <span>●</span>
+                        <span>â—</span>
                         <strong id="headerStatusText">GATEWAY ACTIVE</strong>
                     </div>
                     <div class="header-chip" id="headerModelPill">
-                        <span>🤖</span>
+                        <span>ðŸ¤–</span>
                         <span>Model: <strong id="headerModelText">Auto Mock</strong></span>
                     </div>
                     <div class="header-chip" id="headerPolicyPill">
-                        <span>🔒</span>
+                        <span>ðŸ”’</span>
                         <span>Policy: <strong id="headerPolicyText">DEFAULT</strong></span>
                     </div>
                 </div>
@@ -106,10 +106,10 @@
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="btn btn-secondary btn-sm" onclick="refreshDashboardData()">
-                                <span>↻</span> Refresh Telemetry
+                                <span>â†»</span> Refresh Telemetry
                             </button>
                             <button class="btn btn-primary btn-sm" onclick="navigateTo('chat')">
-                                <span>🛡️</span> Launch Protected Chat
+                                <span>ðŸ›¡ï¸</span> Launch Protected Chat
                             </button>
                         </div>
                     </div>
@@ -117,7 +117,7 @@
                     <!-- KPI Cards (Real Data from /api/stats) -->
                     <div class="kpi-grid">
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrap kpi-icon-blue">📡</div>
+                            <div class="kpi-icon-wrap kpi-icon-blue">ðŸ“¡</div>
                             <div class="kpi-info">
                                 <div class="kpi-value" id="dashTotalRequests">0</div>
                                 <div class="kpi-label">Total Requests</div>
@@ -125,7 +125,7 @@
                         </div>
 
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrap kpi-icon-red">🚫</div>
+                            <div class="kpi-icon-wrap kpi-icon-red">ðŸš«</div>
                             <div class="kpi-info">
                                 <div class="kpi-value" id="dashBlockedRequests">0</div>
                                 <div class="kpi-label">Threats Blocked</div>
@@ -133,7 +133,7 @@
                         </div>
 
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrap kpi-icon-amber">🛡️</div>
+                            <div class="kpi-icon-wrap kpi-icon-amber">ðŸ›¡ï¸</div>
                             <div class="kpi-info">
                                 <div class="kpi-value" id="dashSanitizedRequests">0</div>
                                 <div class="kpi-label">Prompts Sanitized</div>
@@ -141,7 +141,7 @@
                         </div>
 
                         <div class="kpi-card">
-                            <div class="kpi-icon-wrap kpi-icon-green">✓</div>
+                            <div class="kpi-icon-wrap kpi-icon-green">âœ“</div>
                             <div class="kpi-info">
                                 <div class="kpi-value" id="dashPassedRequests">0</div>
                                 <div class="kpi-label">Clean Passes</div>
@@ -157,13 +157,13 @@
                         </div>
                         <div class="quick-actions-buttons">
                             <button class="btn btn-primary btn-sm" onclick="navigateTo('chat')">
-                                💬 Start Protected Chat
+                                ðŸ’¬ Start Protected Chat
                             </button>
                             <button class="btn btn-secondary btn-sm" onclick="navigateTo('prompt-protection')">
-                                🔍 Scan a Prompt
+                                ðŸ” Scan a Prompt
                             </button>
                             <button class="btn btn-secondary btn-sm" onclick="navigateTo('doc-scanner')">
-                                📄 Scan a Document
+                                ðŸ“„ Scan a Document
                             </button>
                         </div>
                     </div>
@@ -174,10 +174,10 @@
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-header">
                                 <div class="card-title">
-                                    <span>📋</span> Recent Security Events
+                                    <span>ðŸ“‹</span> Recent Security Events
                                 </div>
                                 <button class="btn btn-outline btn-sm" onclick="navigateTo('audit-logs')">
-                                    View Full Audit Log →
+                                    View Full Audit Log â†’
                                 </button>
                             </div>
                             <div class="card-body" style="padding:0;">
@@ -197,7 +197,7 @@
                                             <tr>
                                                 <td colspan="6">
                                                     <div class="empty-state" style="padding: 30px;">
-                                                        <div class="empty-state-icon">🛡️</div>
+                                                        <div class="empty-state-icon">ðŸ›¡ï¸</div>
                                                         <div class="empty-state-title">No events recorded yet</div>
                                                         <div class="empty-state-text">All prompts routed through the gateway are logged here with zero raw secret retention.</div>
                                                     </div>
@@ -215,7 +215,7 @@
                             <div class="card" style="margin-bottom:0;">
                                 <div class="card-header">
                                     <div class="card-title">
-                                        <span>🔒</span> Active Policy
+                                        <span>ðŸ”’</span> Active Policy
                                     </div>
                                     <span class="badge badge-safe">ENFORCED</span>
                                 </div>
@@ -226,9 +226,9 @@
                                             <span class="badge badge-blue" id="dashActivePolicyStrategy">REDACT</span>
                                         </div>
                                         <ul class="policy-feature-list" id="dashPolicyFeatureList">
-                                            <li><span>✓</span> Block on Passwords &amp; API Keys</li>
-                                            <li><span>✓</span> Block Prompt Injection Attacks</li>
-                                            <li><span>○</span> Strict PII Zero-Tolerance</li>
+                                            <li><span>âœ“</span> Block on Passwords &amp; API Keys</li>
+                                            <li><span>âœ“</span> Block Prompt Injection Attacks</li>
+                                            <li><span>â—‹</span> Strict PII Zero-Tolerance</li>
                                         </ul>
                                     </div>
 
@@ -249,7 +249,7 @@
                             <div class="card" style="margin-bottom:0;">
                                 <div class="card-header">
                                     <div class="card-title">
-                                        <span>⚡</span> AI Provider Pipeline
+                                        <span>âš¡</span> AI Provider Pipeline
                                     </div>
                                     <button class="btn btn-outline btn-sm" onclick="navigateTo('settings')">Configure</button>
                                 </div>
@@ -257,19 +257,19 @@
                                     <div style="display:flex; flex-direction:column; gap:12px;" id="dashProviderStatusList">
                                         <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
                                             <span style="display:flex; align-items:center; gap:8px;">
-                                                <span>🤖</span> OpenAI (GPT-4o-mini)
+                                                <span>ðŸ¤–</span> OpenAI (GPT-4o-mini)
                                             </span>
                                             <span class="badge badge-neutral" id="dashOpenAiStatus">Checking...</span>
                                         </div>
                                         <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
                                             <span style="display:flex; align-items:center; gap:8px;">
-                                                <span>✨</span> Google Gemini (1.5 Flash)
+                                                <span>âœ¨</span> Google Gemini (1.5 Flash)
                                             </span>
                                             <span class="badge badge-neutral" id="dashGeminiStatus">Checking...</span>
                                         </div>
                                         <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px;">
                                             <span style="display:flex; align-items:center; gap:8px;">
-                                                <span>🛡️</span> Offline Mock Engine
+                                                <span>ðŸ›¡ï¸</span> Offline Mock Engine
                                             </span>
                                             <span class="badge badge-safe">READY (FALLBACK)</span>
                                         </div>
@@ -294,7 +294,7 @@
                                 <span>+</span> New Chat
                             </button>
                             <button class="btn btn-secondary btn-sm" onclick="clearChatMessages()">
-                                <span>🗑️</span> Clear
+                                <span>ðŸ—‘ï¸</span> Clear
                             </button>
                         </div>
                     </div>
@@ -338,10 +338,10 @@
 
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span class="badge badge-safe" id="chatSecurityStatusBadge">
-                                    <span>●</span> SHIELD ENGAGED
+                                    <span>â—</span> SHIELD ENGAGED
                                 </span>
                                 <span class="badge badge-neutral" id="chatActiveProviderBadge">
-                                    <span>●</span> RESOLVING PROVIDER...
+                                    <span>â—</span> RESOLVING PROVIDER...
                                 </span>
                             </div>
                         </div>
@@ -350,7 +350,7 @@
                         <div class="chat-messages-container" id="chatMessagesContainer">
                             <!-- Welcome Card with Starters -->
                             <div class="chat-welcome-container" id="chatWelcomeCard">
-                                <div class="chat-welcome-icon">🛡️</div>
+                                <div class="chat-welcome-icon">ðŸ›¡ï¸</div>
                                 <div class="chat-welcome-title">ProtectoShield Protected Assistant</div>
                                 <div class="chat-welcome-desc">
                                     Every message is inspected, sanitized, and tokenized before transmission to the AI model. 
@@ -382,7 +382,7 @@
                         <div class="chat-input-bar" style="flex-direction:column; align-items:stretch;">
                             <!-- Pre-flight safety banner (dynamic) -->
                             <div class="chat-live-safety-bar" id="chatPreflightBanner" style="display:none;">
-                                <span id="chatPreflightMessage">⚠️ Sensitive entities detected in composer</span>
+                                <span id="chatPreflightMessage">âš ï¸ Sensitive entities detected in composer</span>
                                 <span class="badge badge-warning" id="chatPreflightBadge">SCANNING</span>
                             </div>
 
@@ -390,10 +390,10 @@
                                 <textarea class="chat-input-textarea" id="chatInputText" rows="2" placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)" oninput="handleChatComposerInput(this.value)"></textarea>
 
                                 <button class="btn-stop-gen" id="chatStopButton" onclick="stopChatGeneration()">
-                                    <span>⏹️</span> Stop
+                                    <span>â¹ï¸</span> Stop
                                 </button>
                                 <button class="btn btn-primary" id="chatSendButton" onclick="sendProtectedChatMessage()">
-                                    <span>🛡️</span> Send
+                                    <span>ðŸ›¡ï¸</span> Send
                                 </button>
                             </div>
 
@@ -416,7 +416,7 @@
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="btn btn-primary btn-sm" onclick="navigateTo('chat')">
-                                <span>💬</span> Open Protected Chat
+                                <span>ðŸ’¬</span> Open Protected Chat
                             </button>
                         </div>
                     </div>
@@ -460,7 +460,7 @@
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
                                     <span style="font-size:12px; color:var(--text-muted);" id="scannerCharCounter">0 characters</span>
                                     <button class="btn btn-primary" id="scannerRunBtn" onclick="runPromptScan()">
-                                        <span>🛡️</span> Scan &amp; Analyze Prompt
+                                        <span>ðŸ›¡ï¸</span> Scan &amp; Analyze Prompt
                                     </button>
                                 </div>
                             </div>
@@ -472,7 +472,7 @@
                                 <div class="card-title">Protected Prompt (Sanitized for AI)</div>
                                 <div style="display:flex; gap:8px; align-items:center;">
                                     <span class="badge badge-neutral" id="scannerDecisionBadge">STANDBY</span>
-                                    <button class="btn btn-secondary btn-sm" onclick="copyBoxText('scannerProtectedOutput')">📋 Copy</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="copyBoxText('scannerProtectedOutput')">ðŸ“‹ Copy</button>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -500,7 +500,7 @@
                             <!-- Threat Alert Box (shown if blocked or injection detected) -->
                             <div id="scannerThreatBanner" style="display:none; margin-bottom:14px; padding:12px 16px; border-radius:var(--radius-md); background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:var(--state-danger);">
                                 <div style="font-weight:700; display:flex; align-items:center; gap:6px;">
-                                    <span>🚨</span> <span id="scannerThreatTitle">THREAT DETECTED</span>
+                                    <span>ðŸš¨</span> <span id="scannerThreatTitle">THREAT DETECTED</span>
                                 </div>
                                 <div style="margin-top:4px; font-size:13px;" id="scannerThreatDesc"></div>
                             </div>
@@ -534,13 +534,13 @@
                 <!-- ========================================== -->
                 <section class="view-section" id="section-ai-gateway">
                     <div class="card" style="text-align:center; padding:48px 24px; max-width:680px; margin:40px auto;">
-                        <div style="font-size:42px; margin-bottom:14px;">🛡️</div>
+                        <div style="font-size:42px; margin-bottom:14px;">ðŸ›¡ï¸</div>
                         <h2 style="color:var(--text-primary); margin-bottom:10px; font-size:20px;">AI Gateway Consolidated into Protected Chat</h2>
                         <p style="color:var(--text-secondary); line-height:1.6; margin-bottom:24px; font-size:14px;">
                             The single-shot interceptor has been unified into the <strong>Protected AI Chat</strong> experience. Every prompt is intercepted, inspected, sanitized, and de-tokenized in real-time, with full multi-turn conversation memory and expandable security drawer telemetry.
                         </p>
                         <button class="btn btn-primary" style="margin:0 auto;" onclick="navigateTo('chat')">
-                            <span>💬</span> Launch Protected AI Chat
+                            <span>ðŸ’¬</span> Launch Protected AI Chat
                         </button>
                     </div>
                 </section>
@@ -581,11 +581,11 @@
                                     <label class="form-label">Document Text Content (Paste text below)</label>
                                     <textarea class="form-textarea" id="docScanContent" rows="8" placeholder="Paste document or file text here to scan for confidential PII..."></textarea>
                                     <div style="font-size:11.5px; color:var(--text-muted); margin-top:5px;">
-                                        ℹ️ Text-based analyzer: Evaluates raw text content. Binary PDF/DOCX file upload is not active.
+                                        â„¹ï¸ Text-based analyzer: Evaluates raw text content. Binary PDF/DOCX file upload is not active.
                                     </div>
                                 </div>
                                 <button class="btn btn-primary" style="width:100%;" onclick="runDocumentScan()">
-                                    <span>📄</span> Scan &amp; Sanitize Document Text
+                                    <span>ðŸ“„</span> Scan &amp; Sanitize Document Text
                                 </button>
                             </div>
                         </div>
@@ -647,10 +647,10 @@
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="btn btn-secondary btn-sm" onclick="refreshAuditLogsData()">
-                                <span>↻</span> Refresh
+                                <span>â†»</span> Refresh
                             </button>
                             <button class="btn btn-outline btn-sm" onclick="exportAuditLogsCsv()">
-                                <span>📥</span> Export CSV
+                                <span>ðŸ“¥</span> Export CSV
                             </button>
                         </div>
                     </div>
@@ -692,7 +692,7 @@
                                         <tr>
                                             <td colspan="8">
                                                 <div class="empty-state">
-                                                    <div class="empty-state-icon">📋</div>
+                                                    <div class="empty-state-icon">ðŸ“‹</div>
                                                     <div class="empty-state-title">Loading audit events...</div>
                                                 </div>
                                             </td>
@@ -719,7 +719,7 @@
                         <!-- OpenAI Configuration -->
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-header">
-                                <div class="card-title"><span>🤖</span> OpenAI Integration</div>
+                                <div class="card-title"><span>ðŸ¤–</span> OpenAI Integration</div>
                                 <span class="badge badge-neutral" id="settingsOpenAiBadge">Checking...</span>
                             </div>
                             <div class="card-body">
@@ -746,7 +746,7 @@
                                 </div>
                                 <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
                                     <button class="btn btn-outline btn-sm" onclick="testProviderConnection('openai', this)">
-                                        <span>⚡</span> Test OpenAI Connection
+                                        <span>âš¡</span> Test OpenAI Connection
                                     </button>
                                     <span id="settingsOpenAiTestResult" style="font-size:12px;"></span>
                                 </div>
@@ -756,7 +756,7 @@
                         <!-- Google Gemini Configuration -->
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-header">
-                                <div class="card-title"><span>✨</span> Google Gemini Integration</div>
+                                <div class="card-title"><span>âœ¨</span> Google Gemini Integration</div>
                                 <span class="badge badge-neutral" id="settingsGeminiBadge">Checking...</span>
                             </div>
                             <div class="card-body">
@@ -783,7 +783,7 @@
                                 </div>
                                 <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
                                     <button class="btn btn-outline btn-sm" onclick="testProviderConnection('gemini', this)">
-                                        <span>⚡</span> Test Gemini Connection
+                                        <span>âš¡</span> Test Gemini Connection
                                     </button>
                                     <span id="settingsGeminiTestResult" style="font-size:12px;"></span>
                                 </div>
@@ -793,7 +793,7 @@
                         <!-- General Gateway Info -->
                         <div class="card" style="margin-bottom:0;">
                             <div class="card-header">
-                                <div class="card-title"><span>🛡️</span> Gateway Runtime Environment</div>
+                                <div class="card-title"><span>ðŸ›¡ï¸</span> Gateway Runtime Environment</div>
                             </div>
                             <div class="card-body">
                                 <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
@@ -829,3 +829,4 @@
     <script src="/app.js?v=3.2"></script>
 </body>
 </html>
+
