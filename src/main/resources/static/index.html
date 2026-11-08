@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -786,6 +786,40 @@
                                         <span>âš¡</span> Test Gemini Connection
                                     </button>
                                     <span id="settingsGeminiTestResult" style="font-size:12px;"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Google OAuth Configuration -->
+                        <div class="card" style="margin-bottom:0;">
+                            <div class="card-header">
+                                <div class="card-title"><span>🔐</span> Google OAuth Sign-In</div>
+                                <span class="badge badge-neutral" id="settingsGoogleBadge">Checking...</span>
+                            </div>
+                            <div class="card-body">
+                                <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+                                    Enterprise Google OAuth 2.0 SSO authentication for login and user account resolution.
+                                </p>
+                                <div class="form-group">
+                                    <label class="form-label">Authorized Redirect URI (Copy to Google Console)</label>
+                                    <div style="display:flex; gap:8px;">
+                                        <input type="text" class="form-input mono" id="settingsGoogleRedirectUri" readonly value="http://localhost:8080/auth/oauth2/callback" style="font-size:12px; background:var(--bg-card-subtle);">
+                                        <button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('settingsGoogleRedirectUri').value); showToast('Copied redirect URI!', 'success');">Copy</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Google Client ID</label>
+                                    <input type="text" class="form-input" id="settingsGoogleClientIdInput" placeholder="xxxx.apps.googleusercontent.com" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Google Client Secret</label>
+                                    <div style="display:flex; gap:8px;">
+                                        <input type="password" class="form-input" id="settingsGoogleSecretInput" placeholder="GOCSPX-..." autocomplete="off">
+                                        <button class="btn btn-secondary btn-sm" onclick="saveGoogleOAuthConfig()">Save</button>
+                                    </div>
+                                    <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;" id="settingsGoogleMaskedStatus">
+                                        Status: Checking...
+                                    </div>
                                 </div>
                             </div>
                         </div>

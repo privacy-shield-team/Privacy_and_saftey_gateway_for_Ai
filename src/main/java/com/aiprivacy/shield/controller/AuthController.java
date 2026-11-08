@@ -62,7 +62,32 @@ public class AuthController {
         config.put("captchaConfigured", captchaService.isCaptchaConfigured());
         config.put("captchaSiteKey", captchaService.isCaptchaConfigured() ? turnstileSiteKey : null);
         config.put("googleOAuthConfigured", googleClientId != null && !googleClientId.isBlank());
+        config.put("googleRedirectUri", googleRedirectUri);
+        config.put("googleClientIdMasked", (googleClientId != null && !googleClientId.isBlank())
+                ? (googleClientId.substring(0, Math.min(8, googleClientId.length())) + "...") : "Not Configured");
         return ResponseEntity.ok(config);
+    }
+
+    @PostMapping("/oauth2/config")
+    public ResponseEntity<Map<String, Object>> updateGoogleOAuthConfig(@RequestBody Map<String, String> body) {
+        String clientId = body.get("clientId");
+        String clientSecret = body.get("clientSecret");
+
+        if (clientId != null && !clientId.isBlank()) {
+            this.googleClientId = clientId.trim();
+        }
+        if (clientSecret != null && !clientSecret.isBlank()) {
+            this.googleClientSecret = clientSecret.trim();
+        }
+
+        boolean configured = this.googleClientId != null && !this.googleClientId.isBlank();
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", configured ? "Google OAuth credentials updated successfully." : "Google OAuth credentials cleared.",
+                "googleOAuthConfigured", configured,
+                "googleRedirectUri", this.googleRedirectUri
+        ));
     }
 
     // ─── Session Check ─────────────────────────────────────────────────────────
@@ -194,9 +219,13 @@ public class AuthController {
     @GetMapping("/oauth2/google")
     public ResponseEntity<Map<String, Object>> initiateGoogleOAuth(HttpServletRequest request) {
         if (googleClientId == null || googleClientId.isBlank()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
-                    Map.of("error", "Google OAuth is not configured on this server.",
-                            "help", "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.")
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of(
+                            "configured", false,
+                            "error", "Google OAuth credentials are not configured.",
+                            "redirectUri", googleRedirectUri,
+                            "help", "Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables or configure them in the Google Sign-In setup dialog."
+                    )
             );
         }
 
@@ -212,7 +241,10 @@ public class AuthController {
                 "&state=" + state +
                 "&access_type=offline";
 
-        return ResponseEntity.ok(Map.of("redirectUrl", authUrl));
+        return ResponseEntity.ok(Map.of(
+                "configured", true,
+                "redirectUrl", authUrl
+        ));
     }
 
     /**

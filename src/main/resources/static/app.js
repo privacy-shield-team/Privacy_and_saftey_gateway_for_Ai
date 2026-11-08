@@ -72,6 +72,8 @@ function navigateTo(sectionId) {
         loadAllPolicies();
     } else if (sectionId === 'audit-logs') {
         refreshAuditLogsData();
+    } else if (sectionId === 'settings') {
+        fetchGoogleOAuthConfig();
     }
 }
 
@@ -1839,3 +1841,72 @@ async function handleLogout() {
     window.location.href = '/login.html';
 }
 
+
+// ----------------------------------------------------
+// Google OAuth Configuration in Settings
+// ----------------------------------------------------
+async function fetchGoogleOAuthConfig() {
+    try {
+        const res = await fetch('/auth/config');
+        if (!res.ok) return;
+        const cfg = await res.json();
+
+        const badge = document.getElementById('settingsGoogleBadge');
+        const status = document.getElementById('settingsGoogleMaskedStatus');
+        const redirectEl = document.getElementById('settingsGoogleRedirectUri');
+
+        if (redirectEl && cfg.googleRedirectUri) {
+            redirectEl.value = cfg.googleRedirectUri;
+        }
+
+        if (cfg.googleOAuthConfigured) {
+            if (badge) {
+                badge.className = 'badge badge-safe';
+                badge.textContent = 'Active (Configured)';
+            }
+            if (status) {
+                status.innerHTML = '<span style=\"color:var(--state-safe);\">âœ“ Configured: ' + (cfg.googleClientIdMasked || 'Active') + '</span>';
+            }
+        } else {
+            if (badge) {
+                badge.className = 'badge badge-neutral';
+                badge.textContent = 'Not Configured';
+            }
+            if (status) {
+                status.textContent = 'Status: Not Configured (Enter credentials or set GOOGLE_CLIENT_ID)';
+            }
+        }
+    } catch (e) {
+        console.warn('Could not load Google OAuth config:', e);
+    }
+}
+
+async function saveGoogleOAuthConfig() {
+    const clientId = (document.getElementById('settingsGoogleClientIdInput') ? document.getElementById('settingsGoogleClientIdInput').value : '').trim();
+    const clientSecret = (document.getElementById('settingsGoogleSecretInput') ? document.getElementById('settingsGoogleSecretInput').value : '').trim();
+
+    if (!clientId) {
+        showToast('Please enter a Google Client ID.', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch('/auth/oauth2/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId, clientSecret })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            showToast('Google OAuth configuration saved!', 'success');
+            fetchGoogleOAuthConfig();
+            if (document.getElementById('settingsGoogleSecretInput')) {
+                document.getElementById('settingsGoogleSecretInput').value = '';
+            }
+        } else {
+            showToast(data.error || 'Failed to save Google OAuth configuration', 'error');
+        }
+    } catch (e) {
+        showToast('Failed to connect to gateway', 'error');
+    }
+}

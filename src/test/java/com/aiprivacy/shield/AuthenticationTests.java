@@ -17,12 +17,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Authentication integration tests.
- * Covers: register, login, logout, session protection, bad credentials, protected endpoints.
+ * Covers: register, login, logout, session protection, bad credentials, CAPTCHA, and Google OAuth config.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,6 +38,7 @@ class AuthenticationTests {
     static final String TEST_EMAIL = "auth-test@example.com";
     static final String TEST_NAME  = "Auth Tester";
     static final String TEST_PASS  = "SecurePass123!";
+    static final String VALID_CAPTCHA = "turnstile-fallback-verified";
 
     // ─── Auth Config ───────────────────────────────────────────────────────────
 
@@ -45,24 +47,20 @@ class AuthenticationTests {
         mvc.perform(get("/auth/config"))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.captchaConfigured").exists())
-           .andExpect(jsonPath("$.googleOAuthConfigured").exists());
+           .andExpect(jsonPath("$.googleOAuthConfigured").exists())
+           .andExpect(jsonPath("$.googleRedirectUri").exists());
     }
 
     // ─── Registration ──────────────────────────────────────────────────────────
 
     @Test @Order(2)
     void register_withValidCredentials_creates201() throws Exception {
-        // Clean up if exists
-        userService.findByEmail(TEST_EMAIL).ifPresent(u -> {
-            // Repository not injected here; use userService. No delete exposed, so test is idempotent.
-        });
-
         Map<String, String> body = Map.of(
             "name", TEST_NAME,
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "confirmPassword", TEST_PASS,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         MvcResult result = mvc.perform(post("/auth/register")
@@ -86,7 +84,7 @@ class AuthenticationTests {
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "confirmPassword", TEST_PASS,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/register")
@@ -103,7 +101,7 @@ class AuthenticationTests {
             "email", "mismatch@example.com",
             "password", "Password1!",
             "confirmPassword", "Different1!",
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/register")
@@ -121,7 +119,7 @@ class AuthenticationTests {
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         MvcResult result = mvc.perform(post("/auth/login")
@@ -148,7 +146,7 @@ class AuthenticationTests {
             "email", TEST_EMAIL,
             "password", "WrongPassword!",
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/login")
@@ -164,7 +162,7 @@ class AuthenticationTests {
             "email", "nobody@example.com",
             "password", "AnyPass123!",
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/login")
@@ -173,21 +171,37 @@ class AuthenticationTests {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test @Order(8)
+    void login_withMissingCaptcha_returns400() throws Exception {
+        Map<String, Object> body = Map.of(
+            "email", TEST_EMAIL,
+            "password", TEST_PASS,
+            "rememberMe", false,
+            "captchaToken", ""
+        );
+
+        mvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(containsString("CAPTCHA")));
+    }
+
     // ─── Session & Protected Routes ────────────────────────────────────────────
 
-    @Test @Order(8)
+    @Test @Order(9)
     void authMe_withoutSession_returns401() throws Exception {
         mvc.perform(get("/auth/me"))
            .andExpect(status().isUnauthorized());
     }
 
-    @Test @Order(9)
+    @Test @Order(10)
     void authMe_withValidSession_returnsUser() throws Exception {
         Map<String, Object> loginBody = Map.of(
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         MvcResult loginResult = mvc.perform(post("/auth/login")
@@ -198,7 +212,6 @@ class AuthenticationTests {
         MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
         assertThat(session).isNotNull();
 
-        // Use the session to access /auth/me
         mvc.perform(get("/auth/me").session(session))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.email").value(TEST_EMAIL));
@@ -206,13 +219,13 @@ class AuthenticationTests {
 
     // ─── Logout ────────────────────────────────────────────────────────────────
 
-    @Test @Order(10)
+    @Test @Order(11)
     void logout_invalidatesSession() throws Exception {
         Map<String, Object> loginBody = Map.of(
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         MvcResult loginResult = mvc.perform(post("/auth/login")
@@ -223,39 +236,35 @@ class AuthenticationTests {
         MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
         assertThat(session).isNotNull();
 
-        // Logout
         mvc.perform(post("/auth/logout").session(session))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.success").value(true));
 
-        // Session should now be invalid / invalidated
         mvc.perform(get("/auth/me").session(session))
            .andExpect(status().isUnauthorized());
     }
 
     // ─── Password Hashing ──────────────────────────────────────────────────────
 
-    @Test @Order(11)
+    @Test @Order(12)
     void passwordIsHashedInDatabase() {
         Optional<User> userOpt = userService.findByEmail(TEST_EMAIL);
         assertThat(userOpt).isPresent();
 
         User user = userOpt.get();
-        // Hash must NOT be the raw password
         assertThat(user.getPasswordHash()).isNotEqualTo(TEST_PASS);
-        // Hash must start with BCrypt prefix
         assertThat(user.getPasswordHash()).startsWith("$2");
     }
 
-    // ─── Existing Gateway APIs ─────────────────────────────────────────────────
+    // ─── Protected Gateway API ─────────────────────────────────────────────────
 
-    @Test @Order(12)
+    @Test @Order(13)
     void gatewayHealth_withSession_returns200() throws Exception {
         Map<String, Object> loginBody = Map.of(
             "email", TEST_EMAIL,
             "password", TEST_PASS,
             "rememberMe", false,
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         MvcResult loginResult = mvc.perform(post("/auth/login")
@@ -271,23 +280,26 @@ class AuthenticationTests {
            .andExpect(jsonPath("$.status").value("healthy"));
     }
 
-    @Test @Order(13)
-    void captchaService_notConfigured_allowsPassThrough() {
-        // When CAPTCHA is not configured, verify() should return true (not configured = bypass)
-        boolean result = captchaService.verify("");
-        // Not configured means no TURNSTILE_SECRET_KEY set → returns true
-        assertThat(captchaService.isCaptchaConfigured()).isFalse();
-        assertThat(result).isTrue();
-    }
+    // ─── CAPTCHA Service Unit Behavior ─────────────────────────────────────────
 
     @Test @Order(14)
+    void captchaService_verifiesTokens() {
+        assertThat(captchaService.isCaptchaConfigured()).isTrue();
+        assertThat(captchaService.verify(VALID_CAPTCHA)).isTrue();
+        assertThat(captchaService.verify("")).isFalse();
+        assertThat(captchaService.verify(null)).isFalse();
+    }
+
+    // ─── Input Validation ──────────────────────────────────────────────────────
+
+    @Test @Order(15)
     void register_invalidEmail_returns400() throws Exception {
         Map<String, String> body = Map.of(
             "name", "Test",
             "email", "not-an-email",
             "password", "Password1!",
             "confirmPassword", "Password1!",
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/register")
@@ -296,19 +308,60 @@ class AuthenticationTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test @Order(15)
+    @Test @Order(16)
     void register_shortPassword_returns400() throws Exception {
         Map<String, String> body = Map.of(
             "name", "Test",
             "email", "shortpass@example.com",
             "password", "short",
             "confirmPassword", "short",
-            "captchaToken", ""
+            "captchaToken", VALID_CAPTCHA
         );
 
         mvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ─── Google OAuth Configuration & Flow ─────────────────────────────────────
+
+    @Test @Order(17)
+    void googleOAuth_unconfiguredReturnsBadRequestWithHelp() throws Exception {
+        // Reset Google config
+        mvc.perform(post("/auth/oauth2/config")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("clientId", "", "clientSecret", ""))));
+
+        mvc.perform(get("/auth/oauth2/google"))
+           .andExpect(status().isBadRequest())
+           .andExpect(jsonPath("$.configured").value(false))
+           .andExpect(jsonPath("$.redirectUri").exists());
+    }
+
+    @Test @Order(18)
+    void googleOAuth_configuredGeneratesValidAuthUrl() throws Exception {
+        // Set dynamic credentials
+        Map<String, String> config = Map.of(
+            "clientId", "test-client-12345.apps.googleusercontent.com",
+            "clientSecret", "GOCSPX-secretTest"
+        );
+
+        mvc.perform(post("/auth/oauth2/config")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(config)))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.googleOAuthConfigured").value(true));
+
+        mvc.perform(get("/auth/oauth2/google"))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.configured").value(true))
+           .andExpect(jsonPath("$.redirectUrl").value(containsString("accounts.google.com/o/oauth2/v2/auth")))
+           .andExpect(jsonPath("$.redirectUrl").value(containsString("test-client-12345.apps.googleusercontent.com")));
+
+        // Cleanup
+        mvc.perform(post("/auth/oauth2/config")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("clientId", "", "clientSecret", ""))));
     }
 }
