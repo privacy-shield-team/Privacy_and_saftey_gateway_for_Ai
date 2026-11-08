@@ -344,14 +344,15 @@ async function fetchProviderStatus() {
             sGeminiMasked.innerHTML = `Key Status: <strong class="mono" style="color:${prov.geminiConfigured ? 'var(--state-safe)' : 'var(--text-muted)'}">${escapeHtml(prov.geminiMaskedKey || 'Not Configured')}</strong>`;
         }
 
+        state.providers = prov;
         // Sync model selects if values are present
         if (prov.openaiModel) {
             const mSel = document.getElementById('settingsOpenAiModelSelect');
-            if (mSel && !mSel.value) mSel.value = prov.openaiModel;
+            if (mSel) mSel.value = prov.openaiModel;
         }
         if (prov.geminiModel) {
             const gSel = document.getElementById('settingsGeminiModelSelect');
-            if (gSel && !gSel.value) gSel.value = prov.geminiModel;
+            if (gSel) gSel.value = prov.geminiModel;
         }
     } catch (err) {
         console.warn('Error fetching providers:', err.message);
@@ -365,16 +366,20 @@ async function saveProviderConfig(provider) {
     const apiKey = keyInput ? keyInput.value.trim() : '';
     const model = modelSelect ? modelSelect.value : '';
 
-    if (!apiKey) {
+    const isConfigured = state.providers && (isAi ? state.providers.openaiConfigured : state.providers.geminiConfigured);
+
+    if (!apiKey && !isConfigured) {
         showToast('Please enter an API key', 'warning');
         return;
     }
 
     try {
+        const payload = { provider, model };
+        if (apiKey) payload.apiKey = apiKey;
         const res = await fetch('/api/providers/config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ provider, apiKey, model })
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (data.success) {
@@ -389,18 +394,38 @@ async function saveProviderConfig(provider) {
     }
 }
 
+async function saveProviderModel(provider, model) {
+    if (!model) return;
+    try {
+        const res = await fetch('/api/providers/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider: provider, model: model })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`${provider.toUpperCase()} model updated to ${model}`, 'success');
+            await fetchProviderStatus();
+        }
+    } catch (err) {
+        console.warn('Failed to auto-update model selection:', err);
+    }
+}
+
 async function testProviderConnection(provider, btn) {
     const isAi = provider === 'openai';
     const resultSpan = document.getElementById(isAi ? 'settingsOpenAiTestResult' : 'settingsGeminiTestResult');
+    const modelSelect = document.getElementById(isAi ? 'settingsOpenAiModelSelect' : 'settingsGeminiModelSelect');
+    const selectedModel = (modelSelect && modelSelect.value) ? modelSelect.value.trim() : null;
     const originalText = btn ? btn.innerHTML : '';
-    if (btn) btn.innerHTML = '<span>${ICONS.refresh}</span> Testing...';
+    if (btn) btn.innerHTML = '<span>' + ICONS.refresh + '</span> Testing...';
     if (resultSpan) resultSpan.innerHTML = '<span style="color:var(--text-muted);">Pinging API endpoint...</span>';
 
     try {
         const res = await fetch('/api/providers/test', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ provider: provider, model: (modelSelect ? modelSelect.value : null) })
+            body: JSON.stringify({ provider: provider, model: selectedModel })
         });
         const data = await res.json();
         if (data.success) {
